@@ -3,12 +3,16 @@ import socket
 import time
 from i2c import I2CInterface
 from utils import Utils
+import websockets
+import asyncio
 
 
 class Threads:
     def __init__(self):
         self.is_camera_active = False
         self.is_controller_active = False
+
+        self.utils = Utils()
 
         self.i2c = I2CInterface()
         self.sckt = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -29,5 +33,9 @@ class Threads:
                 time.sleep(default_standby_time)
 
     def capture_stream(self):
-        # TODO: Add camera capturing
-        pass
+        PORT = 9000
+        ADDRESS = "10.3.141.1"
+
+        start_server = websockets.serve(self.utils.transmit, host=ADDRESS, port=PORT)
+
+        asyncio.get_event_loop().run_until_complete(start_server)
