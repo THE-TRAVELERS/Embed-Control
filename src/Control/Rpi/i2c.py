@@ -1,7 +1,7 @@
 import smbus
 
 
-class I2CInterface:
+class I2CUtils:
     """
     A class to represent an I2C interface.
 

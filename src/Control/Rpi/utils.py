@@ -1,7 +1,11 @@
-import websockets
-import cv2
-import base64
 import os
+import cv2
+import board
+import base64
+import asyncio
+import websockets
+from busio import I2C
+import adafruit_bme680
 
 
 class Utils:
@@ -20,8 +24,8 @@ class Utils:
         """
         Constructs all the necessary attributes for the utility object.
         """
-
-        pass
+        self.i2c = I2C(board.SCL, board.SDA)
+        self.bme680 = adafruit_bme680.Adafruit_BME680_I2C(self.i2c, debug=False)
 
     def unwrap_message(self, message):
         """
@@ -37,7 +41,6 @@ class Utils:
             str
                 a string representing the unwrapped message
         """
-
         if not isinstance(message, list) or not all(
             isinstance(m, str) for m in message
         ):
@@ -47,7 +50,7 @@ class Utils:
         unwrapped_message = unwrapped_message[1:].strip("'")
         return unwrapped_message
 
-    async def transmit(websocket):
+    async def ws_video(websocket):
         """
         Captures the video stream from the camera and transmits it to the client.
 
@@ -90,9 +93,47 @@ class Utils:
         except Exception as e:
             print(f"Something went wrong: {e}")
 
+    async def ws_sensor(self, websocket, port):
+        """
+        Captures the sensor data and transmits it to the client.
+
+        Parameters
+        ----------
+            port: int
+                the port number to listen on
+
+        Raises
+        ------
+            websockets.connection.ConnectionClosed
+                if the client disconnects from the server
+
+            Exception
+                if an error occurs during the transmission
+
+        """
+        client_id = 0
+        client_id += 1
+        current_client_id = client_id
+        print(f"New client connected: {current_client_id}")
+        value = -1
+
+        try:
+            while True:
+                if port == 8765:
+                    value = self.bme680.pressure
+                elif port == 8766:
+                    value = self.bme680.temperature
+                elif port == 8767:
+                    value = self.bme680.humidity
+                await websocket.send(str(value))
+                print(value)
+                await asyncio.sleep(1)
+
+        except websockets.exceptions.ConnectionClosed:
+            print(f"Client {current_client_id} disconnected")
+
     def clear_console(self):
         """
         Clears the console screen.
         """
-
         os.system("clear")
