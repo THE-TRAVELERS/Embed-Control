@@ -1,4 +1,5 @@
 import os
+import subprocess
 from halo import Halo
 from functools import wraps
 import time
@@ -102,14 +103,40 @@ class Utils:
             def wrapper(*args, **kwargs):
                 spinner = Halo(text=loading_message, spinner=Utils.spinner_type)
                 spinner.start()
+                time.sleep(1)
+
                 try:
                     result = func(*args, **kwargs)
                     spinner.succeed(success_message) if result == 0 else spinner.fail(
                         failure_message
                     )
+                    return result
                 except Exception as e:
                     spinner.fail(str(e))
 
             return wrapper
 
         return decorator
+
+    @loading(
+        "Checking Wi-Fi host...",
+        "Wi-Fi hostname correct",
+        "Wi-Fi hostname incorrect, please connect to the 'ntw_TRAVELERS' to access further features.",
+    )
+    def get_wifi_info():
+        if os.name == "posix" and os.uname().sysname == "Darwin":
+            process = subprocess.Popen(
+                ["networksetup", "-getairportnetwork", "en0"],
+                stdout=subprocess.PIPE,
+            )
+            out, err = process.communicate()
+            process.wait()
+            wifi_info = {}
+            if out:
+                info = out.decode("utf-8").strip()
+                if ": " in info:
+                    key, val = info.split(": ", 1)
+                    wifi_info[key.strip()] = val.strip()
+            return 0 if wifi_info["Current Wi-Fi Network"] == "ntw_TRAVELERS" else 1
+        else:
+            raise OSError("Unsupported OS")
