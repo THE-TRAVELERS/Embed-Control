@@ -6,33 +6,9 @@ import time
 
 
 class Utils:
-    """
-    A class to represent a utility object.
-
-    ...
-
-    Methods
-    -------
-    unwrap_message(message: list) -> str:
-        Unwraps a message from a list and returns it as a string.
-    """
-
     spinner_type = "boxBounce2"
 
     def unwrap_message(message):
-        """
-        Unwraps a message from a list and returns it as a string.
-
-        Parameters
-        ----------
-            message : list
-                a list containing a single string
-
-        Returns
-        -------
-            str
-                a string representing the unwrapped message
-        """
         if not isinstance(message, list) or not all(
             isinstance(m, str) for m in message
         ):
@@ -43,9 +19,6 @@ class Utils:
         return unwrapped_message
 
     def clear_console():
-        """
-        Clears the console screen.
-        """
         os.system("clear")
 
     def loadings_demo(delay=3) -> None:

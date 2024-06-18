@@ -13,23 +13,6 @@ class Websockets:
         self.bme680 = adafruit_bme680.Adafruit_BME680_I2C(self.i2c, debug=False)
 
     async def ws_video(websocket):
-        """
-        Captures the video stream from the camera and transmits it to the client.
-
-        Parameters
-        ----------
-            websocket : websockets.WebSocketServerProtocol
-                a WebSocket server protocol object
-
-        Raises
-        ------
-            websockets.connection.ConnectionClosed
-                if the client disconnects from the server
-
-            Exception
-                if an error occurs during the transmission
-
-        """
         print("Client Connected !")
         await websocket.send("Connection Established")
 
@@ -56,23 +39,6 @@ class Websockets:
             print(f"Something went wrong: {e}")
 
     async def ws_sensor(self, websocket, port):
-        """
-        Captures the sensor data and transmits it to the client.
-
-        Parameters
-        ----------
-            port: int
-                the port number to listen on
-
-        Raises
-        ------
-            websockets.connection.ConnectionClosed
-                if the client disconnects from the server
-
-            Exception
-                if an error occurs during the transmission
-
-        """
         client_id = 0
         client_id += 1
         current_client_id = client_id
