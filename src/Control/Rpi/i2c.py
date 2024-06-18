@@ -1,4 +1,4 @@
-import smbus2 as smbus
+import smbus2 as smbus # smbus2 not tested yet initially used smbus
 from utils import Utils
 
 
