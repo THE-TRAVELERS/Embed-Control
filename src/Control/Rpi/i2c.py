@@ -1,4 +1,5 @@
-# import smbus
+import smbus2 as smbus
+from utils import Utils
 
 
 class I2CUtils:
@@ -35,10 +36,21 @@ class I2CUtils:
             slave_address : int
                 an integer representing the I2C address of the slave device (default 0x11)
         """
+        self.channel = channel
+        self.slave_address = slave_address
+        self.bus = None
 
-        # self.channel = channel
-        # self.slave_address = slave_address
-        # self.bus = smbus.SMBus(self.channel)
+    @Utils.loading(
+        "Initializing I2C bus...",
+        "I2C bus initialized successfully.",
+        "Failed to initialize I2C bus. Please ensure that the program is run from a Raspberry Pi.",
+    )
+    def init_bus(self):
+        try:
+            self.bus = smbus.SMBus(self.channel)
+            return 0
+        except Exception:
+            return 1
 
     def convert_string_to_bytes(self, val):
         """
@@ -74,7 +86,7 @@ class I2CUtils:
         Returns
         -------
             int
-                -1 if the operation is successful
+                0 if the operation is successful
         """
 
         if i2c_address is None:
@@ -88,4 +100,4 @@ class I2CUtils:
             print(f"Failed to write data: {e}")
             return
 
-        return -1
+        return 0 # updated from -1 to 0
