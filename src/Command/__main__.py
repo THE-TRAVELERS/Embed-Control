@@ -6,7 +6,7 @@ from pyPS4Controller.controller import Controller
 # UDP variables
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 UDP_IP = "10.3.141.1"  # "127.0.0.1" = loopback (send to yourself)
-UDP_PORT = 5005
+UDP_PORT = 9000
 MESSAGE = ""
 
 # L-stick value and R-stick value variables
