@@ -52,12 +52,12 @@ class Threads:
         )
 
         asyncio.get_event_loop().run_until_complete(start_server)
-        
+
     def internal_sensors(self):
         PORT = 9002
-        
+
         start_server = websockets.serve(
             self.utils.ws_internal_sensors, host=self.ADDRESS, port=PORT
         )
-        
+
         asyncio.get_event_loop().run_until_complete(start_server)

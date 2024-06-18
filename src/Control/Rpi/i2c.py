@@ -1,4 +1,4 @@
-import smbus
+# import smbus
 
 
 class I2CUtils:
@@ -36,9 +36,9 @@ class I2CUtils:
                 an integer representing the I2C address of the slave device (default 0x11)
         """
 
-        self.channel = channel
-        self.slave_address = slave_address
-        self.bus = smbus.SMBus(self.channel)
+        # self.channel = channel
+        # self.slave_address = slave_address
+        # self.bus = smbus.SMBus(self.channel)
 
     def convert_string_to_bytes(self, val):
         """
