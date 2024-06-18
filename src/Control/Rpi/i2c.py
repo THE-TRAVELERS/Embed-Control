@@ -97,7 +97,6 @@ class I2CUtils:
         try:
             self.bus.write_i2c_block_data(i2c_address, 0x00, byte_value)
         except Exception as e:
-            print(f"Failed to write data: {e}")
-            return
+            raise e
 
-        return 0 # updated from -1 to 0
+        return 0  # updated from -1 to 0
