@@ -22,6 +22,11 @@ The embedded Raspberry Pi will be responsible for the communication between the 
 
 It is supposed to become an API hosted using Docker for stability, scalability and reliability.
 
+## Installation
+
+> [!NOTE]
+> WIP
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
