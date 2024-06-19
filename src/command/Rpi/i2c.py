@@ -23,7 +23,6 @@ class I2CUtils:
     def convert_string_to_bytes(self, val):
         if not isinstance(val, str):
             raise ValueError("Input must be a string")
-
         return [ord(c) for c in val]
 
     def write_data(self, value, i2c_address=None):
@@ -36,5 +35,3 @@ class I2CUtils:
             self.bus.write_i2c_block_data(i2c_address, 0x00, byte_value)
         except Exception as e:
             raise e
-
-        return 0  # updated from -1 to 0

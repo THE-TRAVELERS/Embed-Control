@@ -5,11 +5,18 @@ import threading
 import websockets
 from utils import Utils
 from i2c import I2CUtils
-# from ws import Websockets
+from ws import Websockets
 
 ADDRESS = "10.3.141.1"
 LISTEN_ADDRESS = "0.0.0.0"
 CONTROLLER_PORT = 9000
+CAMERA_PORT = 9001
+CPU_TEMP_PORT = 9010
+CPU_RAM_PORT = 9011
+CPU_USAGE_PORT = 9012
+SENSOR_HUMIDITY_PORT = 9020
+SENSOR_TEMPERATURE_PORT = 9021
+SENSOR_PRESSURE_PORT = 9022
 
 
 class Threads:
@@ -55,27 +62,22 @@ class Threads:
 
     def stop_controller_stream(self):
         self.is_controller_active = False
-        
-    # def start_sensors_stream(self):
-    # def video_stream(self):
-    #     PORT = 9000
 
-    #     start_server = websockets.serve(Websockets.ws_video, host=ADDRESS, port=PORT)
+    def video_stream(self):
+        start_server = websockets.serve(
+            Websockets.ws_video, host=ADDRESS, port=CAMERA_PORT
+        )
 
-    #     asyncio.get_event_loop().run_until_complete(start_server)
+        asyncio.get_event_loop().run_until_complete(start_server)
 
-    # def sensors_stream(self):
-    #     PORT = 9001
+    def external_sensors_stream(self, port):
+        start_server = websockets.serve(Websockets.ws_external_sensor, host=ADDRESS, port=port)
 
-    #     start_server = websockets.serve(Websockets.ws_sensors, host=ADDRESS, port=PORT)
+        asyncio.get_event_loop().run_until_complete(start_server)
 
-    #     asyncio.get_event_loop().run_until_complete(start_server)
+    def internal_sensors(self, port):
+        start_server = websockets.serve(
+            Websockets.ws_internal_sensors, host=ADDRESS, port=port
+        )
 
-    # def internal_sensors(self):
-    #     PORT = 9002
-
-    #     start_server = websockets.serve(
-    #         Websockets.ws_internal_sensors, host=ADDRESS, port=PORT
-    #     )
-
-    #     asyncio.get_event_loop().run_until_complete(start_server)
+        asyncio.get_event_loop().run_until_complete(start_server)
