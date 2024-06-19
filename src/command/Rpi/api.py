@@ -1,16 +1,17 @@
 import threading
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from utils import Utils
 from threads import Threads
 
 
-def init_i2c(threads):
+def init_i2c(threads: Threads):
     if threads.i2c_utils.init_bus() != 0:
         exit(1)
 
 
 class API:
     app: FastAPI = FastAPI()
+
     services_status = {
         "camera": False,
         "controller": False,
@@ -58,3 +59,20 @@ class API:
     @app.get("/status/all")
     async def get_all_status():
         return API.services_status
+
+    @app.get("/status/{service_name}")
+    async def get_service_status(service_name: str):
+        service_status = API.services_status.get(service_name)
+        if service_status is not None:
+            return {"service": service_name, "status": service_status}
+        else:
+            for key in API.services_status:
+                if (
+                    isinstance(API.services_status[key], dict)
+                    and service_name in API.services_status[key]
+                ):
+                    return {
+                        "service": service_name,
+                        "status": API.services_status[key][service_name],
+                    }
+            raise HTTPException(status_code=404, detail="Service not found")
