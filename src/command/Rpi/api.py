@@ -11,12 +11,26 @@ def init_i2c(threads):
 
 class API:
     app: FastAPI = FastAPI()
+    services_status = {
+        "camera": False,
+        "controller": False,
+        "external_sensor": {
+            "humidity": False,
+            "temperature": False,
+            "pressure": False,
+        },
+        "internal_sensor": {
+            "CPU_temperature": False,
+            "CPU_usage": False,
+            "RAM_usage": False,
+        },
+    }
 
     def __init__(self):
         self.t_run: threading.Thread
         self.threads = Threads()
 
-        init_i2c(self.threads)
+        # init_i2c(self.threads)
 
     def run(self):
         try:
@@ -39,4 +53,8 @@ class API:
 
     @app.get("/ping")
     async def ping():
-        return {"pong", "pang", "ping"}
+        return {"Connection Status": "Active"}
+
+    @app.get("/status/all")
+    async def get_all_status():
+        return API.services_status
