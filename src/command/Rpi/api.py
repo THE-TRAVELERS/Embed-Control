@@ -1,11 +1,22 @@
 import threading
 from fastapi import FastAPI
 from utils import Utils
+from threads import Threads
+
+
+def init_i2c(threads):
+    if threads.i2c_utils.init_bus() != 0:
+        exit(1)
 
 
 class API:
     app: FastAPI = FastAPI()
-    t_run: threading.Thread
+
+    def __init__(self):
+        self.t_run: threading.Thread
+        self.threads = Threads()
+
+        init_i2c(self.threads)
 
     def run(self):
         try:

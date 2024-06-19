@@ -3,15 +3,6 @@ from utils import Utils
 from dotenv import load_dotenv
 
 
-######################################
-# Feature for pc_main.py
-#
-# def check_wifi():
-#     if Utils.get_wifi_info() != 0:
-#         exit(1)
-######################################
-
-
 @Utils.loading(
     "Loading environment variables...",
     "Environment variables loaded successfully.",
@@ -30,16 +21,11 @@ def start_api():
     return project_api.run()
 
 
-def init_i2c(threads):
-    if threads.i2c_utils.init_bus() != 0:
-        exit(1)
-
-
 if __name__ == "__main__":
     try:
-        project_api = API()
-
         load_variables()
+
+        project_api = API()
 
         if start_api() != 0:
             exit(1)
