@@ -6,13 +6,29 @@ import websockets
 from utils import Utils
 from i2c import I2CUtils
 from ws import Websockets
+from dotenv import load_dotenv
+
+
+@Utils.loading(
+    "Loading environment variables...",
+    "Environment variables loaded successfully.",
+    "Failed to load environment variables.",
+)
+def load_variables():
+    return 0 if load_dotenv() else 1
 
 
 class Threads:
-    def __init__(self):
-        self.is_camera_active = False
-        self.is_controller_active = False
+    Utils.clear_console()
+    load_variables()
+    t_controller: threading.Thread
+    t_camera: threading.Thread
+    ###################################
+    # ! Test
+    t_test: threading.Thread
+    ###################################
 
+    def __init__(self):
         self.i2c_utils = I2CUtils()
 
         self.controller_socket = socket.socket(
@@ -25,9 +41,23 @@ class Threads:
             )
         )
 
-        # self.t_camera = threading.Thread(target=self.video_stream)
+    @Utils.loading(
+        "Initializing threads...",
+        "Threads initialized successfully.",
+        "Failed to initialize threads.",
+    )
+    def init_threads(self):
+        try:
+            self.t_controller = threading.Thread(target=self.controller_stream)
+            self.t_camera = threading.Thread(target=self.video_stream)
+            #########################################################
+            # ! Test
+            self.t_test = threading.Thread(target=Threads.test)
+            #########################################################
 
-        # self.t_camera.start()
+            return 0
+        except Exception:
+            return 1
 
     @Utils.loading(
         "Starting controller stream...",
@@ -36,26 +66,17 @@ class Threads:
     )
     def start_controller_stream(self):
         try:
-            self.is_controller_active = True
             self.t_controller = threading.Thread(target=self.controller_stream)
             self.t_controller.start()
             return 0
         except Exception:
             return 1
 
-    def controller_stream(
-        self, default_speed=200 * (10 ** (-6)), default_standby_time=3
-    ):
+    def controller_stream(self, default_speed=200 * (10 ** (-6))):
         while True:
-            if self.is_controller_active:
-                recept = Utils.unwrap_message(self.sckt.recvfrom(1024))
-                self.i2c_utils.write_data(recept)
-                time.sleep(default_speed)
-            else:
-                time.sleep(default_standby_time)
-
-    def stop_controller_stream(self):
-        self.is_controller_active = False
+            recept = Utils.unwrap_message(self.sckt.recvfrom(1024))
+            self.i2c_utils.write_data(recept)
+            time.sleep(default_speed)
 
     def video_stream(self):
         start_server = websockets.serve(
@@ -83,3 +104,23 @@ class Threads:
         )
 
         asyncio.get_event_loop().run_until_complete(start_server)
+
+    #####################################################################
+    # ! Test
+    def start_test(self):
+        self.t_test.start()
+
+    def test():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        start_server = websockets.serve(
+            Websockets.ws_test,
+            host=Utils.read_variable("LOCAL_ADDRESS"),
+            port=8500,
+        )
+
+        loop.run_until_complete(start_server)
+        loop.run_forever()
+
+    #####################################################################

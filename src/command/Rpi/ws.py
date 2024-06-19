@@ -59,3 +59,17 @@ class Websockets:
 
     async def ws_internal_sensors(self, websocket, port):
         pass
+
+    ##########################################################
+    # ! Test
+    async def ws_test(websocket):
+        count = 0
+        try:
+            while True:
+                await websocket.send(str(count))
+                count += 1
+                await asyncio.sleep(1)
+        except websockets.exceptions.ConnectionClosed:
+            pass
+
+    ##########################################################

@@ -9,9 +9,15 @@ def init_i2c(threads: Threads):
         exit(1)
 
 
-class API:
-    app: FastAPI = FastAPI()
+def init_threads(threads: Threads):
+    if threads.init_threads() != 0:
+        exit(1)
 
+
+class API:
+    threads: Threads = Threads()
+    app: FastAPI = FastAPI()
+    t_run: threading.Thread
     services_status = {
         "camera": False,
         "controller": False,
@@ -25,13 +31,15 @@ class API:
             "CPU_usage": False,
             "RAM_usage": False,
         },
+        ###############
+        # ! Test
+        "test": False,
+        ##############
     }
 
     def __init__(self):
-        self.t_run: threading.Thread
-        self.threads = Threads()
-
         # init_i2c(self.threads)
+        init_threads(self.threads)
 
     def run(self):
         try:
@@ -76,3 +84,16 @@ class API:
                         "status": API.services_status[key][service_name],
                     }
             raise HTTPException(status_code=404, detail="Service not found")
+
+    ####################################################################################################
+    # ! Test
+    # @app.post("/start/{service_name}")
+    @app.post("/start/test")
+    async def start_test():
+        if API.services_status["test"]:
+            raise HTTPException(status_code=400, detail="Service already running.")
+        API.threads.start_test()
+        API.services_status["test"] = True
+        return {"service": "test", "status": API.services_status["test"]}
+
+    ####################################################################################################

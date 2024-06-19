@@ -1,15 +1,5 @@
 from api import API
 from utils import Utils
-from dotenv import load_dotenv
-
-
-@Utils.loading(
-    "Loading environment variables...",
-    "Environment variables loaded successfully.",
-    "Failed to load environment variables.",
-)
-def load_variables():
-    return 0 if load_dotenv() else 1
 
 
 @Utils.loading(
@@ -23,8 +13,6 @@ def start_api():
 
 if __name__ == "__main__":
     try:
-        load_variables()
-
         project_api = API()
 
         if start_api() != 0:

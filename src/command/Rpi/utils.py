@@ -6,7 +6,7 @@ import time
 
 
 class Utils:
-    spinner_type = "boxBounce2"
+    spinner_type = "line"
 
     def unwrap_message(message):
         if not isinstance(message, list) or not all(
@@ -115,7 +115,7 @@ class Utils:
             raise OSError("Unsupported OS")
 
     def read_variable(var_name):
-        try:
+        try:            
             return os.environ[var_name]
 
         except KeyError:
