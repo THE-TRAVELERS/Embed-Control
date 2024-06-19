@@ -1,5 +1,6 @@
-from threads import Threads
+import api
 from utils import Utils
+from threads import Threads
 from dotenv import load_dotenv
 
 
@@ -21,6 +22,15 @@ def load_variables():
     return 0 if load_dotenv() else 1
 
 
+@Utils.loading(
+    "Starting API...",
+    "API started successfully.",
+    "Failed to start API.",
+)
+def start_api():
+    return api.api().run()
+
+
 def init_i2c(threads):
     if threads.i2c_utils.init_bus() != 0:
         exit(1)
@@ -30,7 +40,9 @@ if __name__ == "__main__":
     try:
         load_variables()
 
-        threads = Threads()
-        init_i2c(threads)
+        start_api()
+
+        # threads = Threads()
+        # init_i2c(threads)
     except KeyboardInterrupt:
         exit(0)
