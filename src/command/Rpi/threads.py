@@ -21,7 +21,7 @@ class Threads:
         self.controller_socket.bind(
             (
                 Utils.read_variable("LISTEN_ADDRESS"),
-                Utils.read_variable("CONTROLLER_PORT"),
+                int(Utils.read_variable("CONTROLLER_PORT")),
             )
         )
 
@@ -61,7 +61,7 @@ class Threads:
         start_server = websockets.serve(
             Websockets.ws_video,
             host=Utils.read_variable("RPI_ADDRESS"),
-            port=Utils.read_variable("CAMERA_PORT"),
+            port=int(Utils.read_variable("CAMERA_PORT")),
         )
 
         asyncio.get_event_loop().run_until_complete(start_server)
