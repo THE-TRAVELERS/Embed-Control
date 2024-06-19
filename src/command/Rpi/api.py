@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from utils import Utils
 
 
-class api:
+class API:
     app: FastAPI = FastAPI()
     t_run: threading.Thread
 
@@ -28,4 +28,4 @@ class api:
 
     @app.get("/ping")
     async def ping():
-        return {"pong"}
+        return {"pong", "pang", "ping"}

@@ -1,6 +1,5 @@
-import api
+from api import API
 from utils import Utils
-from threads import Threads
 from dotenv import load_dotenv
 
 
@@ -28,7 +27,7 @@ def load_variables():
     "Failed to start API.",
 )
 def start_api():
-    return api.api().run()
+    return project_api.run()
 
 
 def init_i2c(threads):
@@ -38,11 +37,13 @@ def init_i2c(threads):
 
 if __name__ == "__main__":
     try:
+        project_api = API()
+
         load_variables()
 
-        start_api()
+        if start_api() != 0:
+            exit(1)
 
-        # threads = Threads()
-        # init_i2c(threads)
+        project_api.t_run.join()
     except KeyboardInterrupt:
         exit(0)
