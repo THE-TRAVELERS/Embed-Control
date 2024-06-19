@@ -102,7 +102,7 @@ class Utils:
                 ["networksetup", "-getairportnetwork", "en0"],
                 stdout=subprocess.PIPE,
             )
-            out, err = process.communicate()
+            out, _ = process.communicate()
             process.wait()
             wifi_info = {}
             if out:
@@ -113,3 +113,10 @@ class Utils:
             return 0 if wifi_info["Current Wi-Fi Network"] == "ntw_TRAVELERS" else 1
         else:
             raise OSError("Unsupported OS")
+
+    def read_variable(var_name):
+        try:
+            return os.environ[var_name]
+
+        except KeyError:
+            return None

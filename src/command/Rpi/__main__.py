@@ -1,4 +1,7 @@
 from threads import Threads
+from utils import Utils
+from dotenv import load_dotenv
+
 
 ######################################
 # Feature for pc_main.py
@@ -9,6 +12,15 @@ from threads import Threads
 ######################################
 
 
+@Utils.loading(
+    "Loading environment variables...",
+    "Environment variables loaded successfully.",
+    "Failed to load environment variables.",
+)
+def load_variables():
+    return 0 if load_dotenv() else 1
+
+
 def init_i2c(threads):
     if threads.i2c_utils.init_bus() != 0:
         exit(1)
@@ -16,6 +28,8 @@ def init_i2c(threads):
 
 if __name__ == "__main__":
     try:
+        load_variables()
+
         threads = Threads()
         init_i2c(threads)
     except KeyboardInterrupt:

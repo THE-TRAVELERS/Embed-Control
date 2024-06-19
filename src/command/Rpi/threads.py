@@ -7,17 +7,6 @@ from utils import Utils
 from i2c import I2CUtils
 from ws import Websockets
 
-ADDRESS = "10.3.141.1"
-LISTEN_ADDRESS = "0.0.0.0"
-CONTROLLER_PORT = 9000
-CAMERA_PORT = 9001
-CPU_TEMP_PORT = 9010
-CPU_RAM_PORT = 9011
-CPU_USAGE_PORT = 9012
-SENSOR_HUMIDITY_PORT = 9020
-SENSOR_TEMPERATURE_PORT = 9021
-SENSOR_PRESSURE_PORT = 9022
-
 
 class Threads:
     def __init__(self):
@@ -29,7 +18,12 @@ class Threads:
         self.controller_socket = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
-        self.controller_socket.bind((LISTEN_ADDRESS, CONTROLLER_PORT))
+        self.controller_socket.bind(
+            (
+                Utils.read_variable("LISTEN_ADDRESS"),
+                Utils.read_variable("CONTROLLER_PORT"),
+            )
+        )
 
         # self.t_camera = threading.Thread(target=self.video_stream)
 
@@ -65,19 +59,27 @@ class Threads:
 
     def video_stream(self):
         start_server = websockets.serve(
-            Websockets.ws_video, host=ADDRESS, port=CAMERA_PORT
+            Websockets.ws_video,
+            host=Utils.read_variable("RPI_ADDRESS"),
+            port=Utils.read_variable("CAMERA_PORT"),
         )
 
         asyncio.get_event_loop().run_until_complete(start_server)
 
     def external_sensors_stream(self, port):
-        start_server = websockets.serve(Websockets.ws_external_sensor, host=ADDRESS, port=port)
+        start_server = websockets.serve(
+            Websockets.ws_external_sensor,
+            host=Utils.read_variable("RPI_ADDRESS"),
+            port=port,
+        )
 
         asyncio.get_event_loop().run_until_complete(start_server)
 
     def internal_sensors(self, port):
         start_server = websockets.serve(
-            Websockets.ws_internal_sensors, host=ADDRESS, port=port
+            Websockets.ws_internal_sensors,
+            host=Utils.read_variable("RPI_ADDRESS"),
+            port=port,
         )
 
         asyncio.get_event_loop().run_until_complete(start_server)
