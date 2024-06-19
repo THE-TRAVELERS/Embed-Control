@@ -3,6 +3,7 @@
 # import base64
 import asyncio
 import websockets
+from utils import Utils
 
 # from busio import I2C
 import adafruit_bme680
@@ -41,9 +42,11 @@ class Websockets:
     async def ws_external_sensor(self, websocket, port, delay=1):
         try:
             sensor_values = {
-                9020: self.bme680.humidity,
-                9021: self.bme680.temperature,
-                9022: self.bme680.pressure,
+                int(Utils.read_variable("SENSOR_HUMIDITY_PORT")): self.bme680.humidity,
+                int(
+                    Utils.read_variable("SENSOR_TEMPERATURE_PORT")
+                ): self.bme680.temperature,
+                int(Utils.read_variable("SENSOR_PRESSURE_PORT")): self.bme680.pressure,
             }
 
             while True:
