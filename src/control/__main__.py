@@ -3,6 +3,15 @@ import threading
 import time
 from pyPS4Controller.controller import Controller
 
+######################################
+# Feature for pc_main.py
+#
+# def check_wifi():
+#     if Utils.get_wifi_info() != 0:
+#         exit(1)
+######################################
+
+
 # UDP variables
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 UDP_IP = "10.3.141.1"  # "127.0.0.1" = loopback (send to yourself)
@@ -217,7 +226,14 @@ th_input.start()
 # Continously sending readable instructions to Raspberry Pi with the PS4 inputs
 while True:
     if oldL != valL or oldR != valR:
-        MESSAGE = str("M,")+str(valL) + ","+(str("A,") if FORWARD_L else str("R,"))+str(valR)+(str(",A") if FORWARD_R else str(",R"))
+        MESSAGE = (
+            str("M,")
+            + str(valL)
+            + ","
+            + (str("A,") if FORWARD_L else str("R,"))
+            + str(valR)
+            + (str(",A") if FORWARD_R else str(",R"))
+        )
         oldL = valL
         oldR = valR
         sock.sendto(MESSAGE.encode(), (UDP_IP, UDP_PORT))
