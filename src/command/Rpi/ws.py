@@ -1,3 +1,6 @@
+import os
+
+import psutil
 from i2c import I2CUtils
 from utils import Utils
 import api
@@ -209,15 +212,20 @@ class Websockets:
 
     async def ws_internal_cpu_temperature(websocket, delay=1):
         while True:
-            # TODO: Implement
+            # TODO: try on Rpi
+            cpu_temp = os.popen("vcgencmd measure_temp").readline()
+            cpu_temp_float = float(cpu_temp.replace("temp=", "").replace("'C\n", ""))
+            await websocket.send_text(str(round(cpu_temp_float, 2)))
             await asyncio.sleep(delay)
 
     async def ws_internal_cpu_usage(websocket, delay=1):
         while True:
-            # TODO: Implement
+            # TODO: try on Rpi
+            await websocket.send_text(str(round(psutil.cpu_percent(interval=1), 2)))
             await asyncio.sleep(delay)
 
     async def ws_internal_ram_usage(websocket, delay=1):
         while True:
-            # TODO: Implement
+            # TODO: try on Rpi
+            await websocket.send_text(str(round(psutil.virtual_memory().percent, 2)))
             await asyncio.sleep(delay)
