@@ -6,6 +6,7 @@ from utils import Utils
     "Starting API...",
     "API started successfully.",
     "Failed to start API.",
+    1,
 )
 def start_api():
     return project_api.run()

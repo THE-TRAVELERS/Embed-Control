@@ -1,7 +1,9 @@
+import asyncio
 import threading
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket
 from utils import Utils
 from threads import Threads
+from functools import wraps
 
 
 def init_i2c(threads: Threads):
@@ -18,9 +20,16 @@ class API:
     threads: Threads = Threads()
     app: FastAPI = FastAPI()
     t_run: threading.Thread
+
     services_status = {
-        "camera": False,
-        "controller": False,
+        "general": {
+            "camera": False,
+            "controller": False,
+            ###############
+            # ! Test
+            "debug_ws": False,
+            ##############
+        },
         "external_sensor": {
             "humidity": False,
             "temperature": False,
@@ -31,10 +40,6 @@ class API:
             "CPU_usage": False,
             "RAM_usage": False,
         },
-        ###############
-        # ! Test
-        "test": False,
-        ##############
     }
 
     def __init__(self):
@@ -60,7 +65,7 @@ class API:
         except Exception:
             return 1
 
-    @app.get("/ping")
+    @app.get("/")
     async def ping():
         return {"Connection Status": "Active"}
 
@@ -70,30 +75,86 @@ class API:
 
     @app.get("/status/{service_name}")
     async def get_service_status(service_name: str):
-        service_status = API.services_status.get(service_name)
-        if service_status is not None:
-            return {"service": service_name, "status": service_status}
-        else:
-            for key in API.services_status:
-                if (
-                    isinstance(API.services_status[key], dict)
-                    and service_name in API.services_status[key]
-                ):
-                    return {
-                        "service": service_name,
-                        "status": API.services_status[key][service_name],
-                    }
-            raise HTTPException(status_code=404, detail="Service not found")
+        for key, sub_services in API.services_status.items():
+            if isinstance(sub_services, dict) and service_name in sub_services:
+                return {"service": service_name, "status": sub_services[service_name]}
+
+        raise HTTPException(status_code=404, detail="Service not found")
 
     ####################################################################################################
     # ! Test
-    # @app.post("/start/{service_name}")
-    @app.post("/start/test")
-    async def start_test():
-        if API.services_status["test"]:
-            raise HTTPException(status_code=400, detail="Service already running.")
-        API.threads.start_test()
-        API.services_status["test"] = True
-        return {"service": "test", "status": API.services_status["test"]}
+    # @app.post("/start/debug")
+    # async def start_test():
+    #     if API.services_status["debug"]:
+    #         raise HTTPException(status_code=400, detail="Service already running.")
+    #     API.threads.start_debug_ws()
+    #     API.services_status["debug"] = True
+    #     return {"service": "debug", "status": API.services_status["debug"]}
 
     ####################################################################################################
+
+    # @app.websocket("/general/debug")
+    # async def websocket_endpoint(websocket: WebSocket):
+    #     await websocket.accept()
+    #     try:
+    #         if API.services_status["debug_ws"]:
+    #             raise Exception("Service already running.")
+    #         else:
+    #             API.services_status["debug_ws"] = True
+
+    #         count = 0
+    #         while True:
+    #             await websocket.send_text(str(count))
+    #             count += 1
+    #             await asyncio.sleep(1)
+    #     except Exception:
+    #         API.services_status["debug_ws"] = False
+
+    # @app.websocket("/{ws_category}/{ws_name}")
+    # async def websocket_endpoint(websocket: WebSocket, ws_category: str, ws_name: str):
+    #     await websocket.accept()
+    #     try:
+    #         if API.services_status[ws_category][ws_name]:
+    #             raise Exception("Service already running.")
+    #         else:
+    #             API.services_status[ws_category][ws_name] = True
+
+    #         ###############################################
+    #         # TODO: Replace
+    #         count = 0
+    #         while True:
+    #             await websocket.send_text(str(count))
+    #             count += 1
+    #             await asyncio.sleep(1)
+    #         ###############################################
+
+    #     except Exception:
+    #         API.services_status[ws_category][ws_name] = False
+
+
+def setup_websocket_service(ws_category: str, ws_name: str, func):
+    @API.app.websocket(f"/{ws_category}/{ws_name}")
+    @wraps(func)
+    async def wrapper(websocket: WebSocket):
+        await websocket.accept()
+        try:
+            if API.services_status[ws_category][ws_name]:
+                raise Exception("Service already running.")
+            else:
+                API.services_status[ws_category][ws_name] = True
+            await func(websocket)
+        except Exception:
+            API.services_status[ws_category][ws_name] = False
+
+    return wrapper
+
+
+async def my_websocket_service(websocket: WebSocket):
+    count = 0
+    while True:
+        await websocket.send_text(str(count))
+        count += 1
+        await asyncio.sleep(1)
+
+
+setup_websocket_service("general", "debug_ws", my_websocket_service)

@@ -6,8 +6,6 @@ import time
 
 
 class Utils:
-    spinner_type = "line"
-
     def unwrap_message(message):
         if not isinstance(message, list) or not all(
             isinstance(m, str) for m in message
@@ -70,13 +68,15 @@ class Utils:
         loading_message="Loading...",
         success_message="Loading complete.",
         failure_message="Loading failed.",
+        startup_time=.75,
+        spinner_type="line",
     ):
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
-                spinner = Halo(text=loading_message, spinner=Utils.spinner_type)
+                spinner = Halo(text=loading_message, spinner=spinner_type)
                 spinner.start()
-                time.sleep(1)
+                time.sleep(startup_time)
 
                 try:
                     result = func(*args, **kwargs)
@@ -115,7 +115,7 @@ class Utils:
             raise OSError("Unsupported OS")
 
     def read_variable(var_name):
-        try:            
+        try:
             return os.environ[var_name]
 
         except KeyError:

@@ -1,8 +1,5 @@
-import time
 import socket
-import asyncio
 import threading
-import websockets
 from utils import Utils
 from i2c import I2CUtils
 from ws import Websockets
@@ -25,7 +22,7 @@ class Threads:
     t_camera: threading.Thread
     ###################################
     # ! Test
-    t_test: threading.Thread
+    t_debug: threading.Thread
     ###################################
 
     def __init__(self):
@@ -48,11 +45,11 @@ class Threads:
     )
     def init_threads(self):
         try:
-            self.t_controller = threading.Thread(target=self.controller_stream)
-            self.t_camera = threading.Thread(target=self.video_stream)
+            self.t_controller = threading.Thread(target=Websockets.ws_controller_loop)
+            self.t_camera = threading.Thread(target=Websockets.ws_video_loop)
             #########################################################
             # ! Test
-            self.t_test = threading.Thread(target=Threads.test)
+            self.t_debug = threading.Thread(target=Websockets.ws_debug_loop)
             #########################################################
 
             return 0
@@ -72,55 +69,11 @@ class Threads:
         except Exception:
             return 1
 
-    def controller_stream(self, default_speed=200 * (10 ** (-6))):
-        while True:
-            recept = Utils.unwrap_message(self.sckt.recvfrom(1024))
-            self.i2c_utils.write_data(recept)
-            time.sleep(default_speed)
-
-    def video_stream(self):
-        start_server = websockets.serve(
-            Websockets.ws_video,
-            host=Utils.read_variable("RPI_ADDRESS"),
-            port=int(Utils.read_variable("CAMERA_PORT")),
-        )
-
-        asyncio.get_event_loop().run_until_complete(start_server)
-
-    def external_sensors_stream(self, port):
-        start_server = websockets.serve(
-            Websockets.ws_external_sensor,
-            host=Utils.read_variable("RPI_ADDRESS"),
-            port=port,
-        )
-
-        asyncio.get_event_loop().run_until_complete(start_server)
-
-    def internal_sensors(self, port):
-        start_server = websockets.serve(
-            Websockets.ws_internal_sensors,
-            host=Utils.read_variable("RPI_ADDRESS"),
-            port=port,
-        )
-
-        asyncio.get_event_loop().run_until_complete(start_server)
+    
 
     #####################################################################
     # ! Test
-    def start_test(self):
-        self.t_test.start()
-
-    def test():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        start_server = websockets.serve(
-            Websockets.ws_test,
-            host=Utils.read_variable("LOCAL_ADDRESS"),
-            port=8500,
-        )
-
-        loop.run_until_complete(start_server)
-        loop.run_forever()
+    def start_debug_ws(self):
+        self.t_debug.start()
 
     #####################################################################
