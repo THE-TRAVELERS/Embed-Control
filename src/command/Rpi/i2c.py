@@ -1,5 +1,4 @@
-import smbus2 as smbus  # smbus2 not tested yet initially used smbus
-from utils import Utils
+import smbus2 as smbus  # ! smbus2 not tested yet initially used smbus
 
 
 class I2CUtils:
@@ -8,11 +7,6 @@ class I2CUtils:
         self.slave_address = slave_address
         self.bus = None
 
-    @Utils.loading(
-        "Initializing I2C bus...",
-        "I2C bus initialized successfully.",
-        "Failed to initialize I2C bus. Please ensure that the program is run from a Raspberry Pi.",
-    )
     def init_bus(self):
         try:
             self.bus = smbus.SMBus(self.channel)

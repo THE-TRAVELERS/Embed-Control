@@ -1,8 +1,8 @@
-import os
-import subprocess
-from halo import Halo
 from functools import wraps
+from halo import Halo
+import subprocess
 import time
+import os
 
 
 class Utils:
@@ -68,7 +68,7 @@ class Utils:
         loading_message="Loading...",
         success_message="Loading complete.",
         failure_message="Loading failed.",
-        startup_time=.75,
+        startup_time=0.75,
         spinner_type="line",
     ):
         def decorator(func):

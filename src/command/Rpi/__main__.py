@@ -1,5 +1,5 @@
-from api import API
 from utils import Utils
+from api import API
 
 
 @Utils.loading(

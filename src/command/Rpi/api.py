@@ -1,34 +1,32 @@
-import asyncio
-import threading
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, HTTPException
+import ws
 from utils import Utils
-from threads import Threads
-from functools import wraps
+import threading
 
 
-def init_i2c(threads: Threads):
-    if threads.i2c_utils.init_bus() != 0:
+def init_websockets():
+    if ws.Websockets.init_board_i2c() != 0:
         exit(1)
 
+    if ws.Websockets.init_ws_general() != 0:
+        exit(1)
 
-def init_threads(threads: Threads):
-    if threads.init_threads() != 0:
+    if ws.Websockets.init_ws_external_sensor() != 0:
+        exit(1)
+
+    if ws.Websockets.init_ws_internal_sensor() != 0:
         exit(1)
 
 
 class API:
-    threads: Threads = Threads()
     app: FastAPI = FastAPI()
     t_run: threading.Thread
 
     services_status = {
         "general": {
-            "camera": False,
+            "video": False,
             "controller": False,
-            ###############
-            # ! Test
-            "debug_ws": False,
-            ##############
+            "debug": False,
         },
         "external_sensor": {
             "humidity": False,
@@ -43,8 +41,7 @@ class API:
     }
 
     def __init__(self):
-        # init_i2c(self.threads)
-        init_threads(self.threads)
+        init_websockets()
 
     def run(self):
         try:
@@ -80,81 +77,3 @@ class API:
                 return {"service": service_name, "status": sub_services[service_name]}
 
         raise HTTPException(status_code=404, detail="Service not found")
-
-    ####################################################################################################
-    # ! Test
-    # @app.post("/start/debug")
-    # async def start_test():
-    #     if API.services_status["debug"]:
-    #         raise HTTPException(status_code=400, detail="Service already running.")
-    #     API.threads.start_debug_ws()
-    #     API.services_status["debug"] = True
-    #     return {"service": "debug", "status": API.services_status["debug"]}
-
-    ####################################################################################################
-
-    # @app.websocket("/general/debug")
-    # async def websocket_endpoint(websocket: WebSocket):
-    #     await websocket.accept()
-    #     try:
-    #         if API.services_status["debug_ws"]:
-    #             raise Exception("Service already running.")
-    #         else:
-    #             API.services_status["debug_ws"] = True
-
-    #         count = 0
-    #         while True:
-    #             await websocket.send_text(str(count))
-    #             count += 1
-    #             await asyncio.sleep(1)
-    #     except Exception:
-    #         API.services_status["debug_ws"] = False
-
-    # @app.websocket("/{ws_category}/{ws_name}")
-    # async def websocket_endpoint(websocket: WebSocket, ws_category: str, ws_name: str):
-    #     await websocket.accept()
-    #     try:
-    #         if API.services_status[ws_category][ws_name]:
-    #             raise Exception("Service already running.")
-    #         else:
-    #             API.services_status[ws_category][ws_name] = True
-
-    #         ###############################################
-    #         # TODO: Replace
-    #         count = 0
-    #         while True:
-    #             await websocket.send_text(str(count))
-    #             count += 1
-    #             await asyncio.sleep(1)
-    #         ###############################################
-
-    #     except Exception:
-    #         API.services_status[ws_category][ws_name] = False
-
-
-def setup_websocket_service(ws_category: str, ws_name: str, func):
-    @API.app.websocket(f"/{ws_category}/{ws_name}")
-    @wraps(func)
-    async def wrapper(websocket: WebSocket):
-        await websocket.accept()
-        try:
-            if API.services_status[ws_category][ws_name]:
-                raise Exception("Service already running.")
-            else:
-                API.services_status[ws_category][ws_name] = True
-            await func(websocket)
-        except Exception:
-            API.services_status[ws_category][ws_name] = False
-
-    return wrapper
-
-
-async def my_websocket_service(websocket: WebSocket):
-    count = 0
-    while True:
-        await websocket.send_text(str(count))
-        count += 1
-        await asyncio.sleep(1)
-
-
-setup_websocket_service("general", "debug_ws", my_websocket_service)
