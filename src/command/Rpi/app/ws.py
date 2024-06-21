@@ -24,7 +24,7 @@ from .utils import Utils
     "Failed to load environment variables.",
 )
 def load_variables():
-    return 0 if load_dotenv() else 1
+    return 0 if load_dotenv('../config/.env') else 1
 
 
 class Websockets:
