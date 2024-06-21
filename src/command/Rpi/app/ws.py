@@ -1,14 +1,14 @@
 import os
-
 import psutil
-from i2c import I2CUtils
-from utils import Utils
-import api
 from dotenv import load_dotenv
 from fastapi import WebSocket
 from functools import wraps
 import asyncio
 import socket
+
+from . import main
+from .i2c import I2CUtils
+from .utils import Utils
 
 # TODO: try using Rpi
 # import base64
@@ -29,7 +29,8 @@ def load_variables():
 
 class Websockets:
     Utils.clear_console()
-    load_variables()
+    if load_variables() != 0:
+        exit(1)
 
     i2c_utils: I2CUtils
     controller_socket: socket.socket
@@ -150,18 +151,18 @@ class Websockets:
             return 1
 
     def setup_websocket_service(ws_category: str, ws_name: str, func):
-        @api.API.app.websocket(f"/{ws_category}/{ws_name}")
+        @main.app.websocket(f"/{ws_category}/{ws_name}")
         @wraps(func)
         async def wrapper(websocket: WebSocket):
             await websocket.accept()
             try:
-                if api.API.services_status[ws_category][ws_name]:
+                if main.services_status[ws_category][ws_name]:
                     raise Exception("Service already running.")
                 else:
-                    api.API.services_status[ws_category][ws_name] = True
+                    main.services_status[ws_category][ws_name] = True
                 await func(websocket)
             except Exception:
-                api.API.services_status[ws_category][ws_name] = False
+                main.services_status[ws_category][ws_name] = False
 
         return wrapper
 

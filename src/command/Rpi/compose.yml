@@ -1,0 +1,16 @@
+services:
+  api:
+    build: .
+    image: travelers_api
+    container_name: travelers_api
+    env_file:
+      - .env
+    command: ["fastapi", "run", "/app/main.py", "--port", "${API_PORT}"]
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    volumes:
+      - ./app:/app
+      - ./.env:/app/.env
+
+    # Uncomment the following line to keep the container running for debugging
+    # command: ["tail", "-f", "/dev/null"]
