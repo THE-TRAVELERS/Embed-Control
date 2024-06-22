@@ -1,10 +1,11 @@
-import os
-import psutil
-from dotenv import load_dotenv
+from typing import Callable, Coroutine
 from fastapi import WebSocket
+from dotenv import load_dotenv
 from functools import wraps
 import asyncio
+import psutil
 import socket
+import os
 
 from . import main
 from .i2c import I2CUtils
@@ -23,8 +24,17 @@ from .utils import Utils
     "Environment variables loaded successfully.",
     "Failed to load environment variables.",
 )
-def load_variables():
-    return 0 if load_dotenv('../config/.env') else 1
+def load_variables(docker_path: str = "../config/.env") -> int:
+    """
+    Loads environment variables from a specified path.
+
+    Args:
+        docker_path (str): The path to the .env file. Defaults to "../config/.env".
+
+    Returns:
+        int: 0 if environment variables were loaded successfully, 1 otherwise.
+    """
+    return 0 if load_dotenv() or load_dotenv(docker_path) else 1
 
 
 class Websockets:
@@ -44,7 +54,14 @@ class Websockets:
         "Board I2C initialized successfully.",
         "Failed to initialize board I2C. Please ensure that the program is run from a Raspberry Pi.",
     )
-    def init_board_i2c():
+    @staticmethod
+    def init_board_i2c() -> int:
+        """
+        Initializes the board I2C interface. Placeholder for Raspberry Pi I2C initialization.
+
+        Returns:
+            int: 0 if initialization was successful, 1 otherwise.
+        """
         try:
             # TODO: try using Rpi
             # Websockets.i2c_utils = I2CUtils()
@@ -74,7 +91,14 @@ class Websockets:
         "(General) Websockets initialized successfully.",
         "(General) Failed to initialize Websockets.",
     )
-    def init_ws_general():
+    @staticmethod
+    def init_ws_general() -> int:
+        """
+        Initializes general WebSocket services.
+
+        Returns:
+            int: 0 if initialization was successful, 1 otherwise.
+        """
         try:
             Websockets.setup_websocket_service(
                 "general",
@@ -101,7 +125,14 @@ class Websockets:
         "(External Sensor) Websockets initialized successfully.",
         "(External Sensor) Failed to initialize Websockets.",
     )
-    def init_ws_external_sensor():
+    @staticmethod
+    def init_ws_external_sensor() -> int:
+        """
+        Initializes external sensor WebSocket services.
+
+        Returns:
+            int: 0 if initialization was successful, 1 otherwise.
+        """
         try:
             Websockets.setup_websocket_service(
                 "external_sensor",
@@ -128,7 +159,14 @@ class Websockets:
         "(Internal Sensor) Websockets initialized successfully.",
         "(Internal Sensor) Failed to initialize Websockets.",
     )
-    def init_ws_internal_sensor():
+    @staticmethod
+    def init_ws_internal_sensor() -> int:
+        """
+        Initializes internal sensor WebSocket services.
+
+        Returns:
+            int: 0 if initialization was successful, 1 otherwise.
+        """
         try:
             Websockets.setup_websocket_service(
                 "internal_sensor",
@@ -150,7 +188,21 @@ class Websockets:
         except Exception:
             return 1
 
-    def setup_websocket_service(ws_category: str, ws_name: str, func):
+    @staticmethod
+    def setup_websocket_service(
+        ws_category: str,
+        ws_name: str,
+        func: Callable[[WebSocket], Coroutine[None, None, None]],
+    ):
+        """
+        Sets up a WebSocket service by decorating the given function with the WebSocket route.
+
+        Args:
+            ws_category (str): The category of the WebSocket service.
+            ws_name (str): The name of the WebSocket service.
+            func (Callable[[WebSocket], Coroutine[None, None, None]]): The async function to be called when the WebSocket is accessed.
+        """
+
         @main.app.websocket(f"/{ws_category}/{ws_name}")
         @wraps(func)
         async def wrapper(websocket: WebSocket):
@@ -166,21 +218,43 @@ class Websockets:
 
         return wrapper
 
+    @staticmethod
     async def ws_debug(websocket: WebSocket):
+        """
+        A WebSocket endpoint for debugging purposes. Sends an incrementing count every second.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+        """
         count = 0
         while True:
             await websocket.send_text(str(count))
             count += 1
             await asyncio.sleep(1)
 
-    async def ws_controller(self, default_speed=0.0002):
+    @staticmethod
+    async def ws_controller(websocket: WebSocket, default_speed: float = 0.0002):
+        """
+        A WebSocket endpoint for controlling the device. Placeholder for actual control logic.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+            default_speed (float): The default speed for the control loop. Defaults to 0.0002.
+        """
         while True:
             # TODO: try on Rpi
             # recept = Utils.unwrap_message(Websockets.controller_socket.recvfrom(1024))
             # Websockets.i2c_utils.write_data(recept)
             await asyncio.sleep(default_speed)
 
-    async def ws_video(websocket):
+    @staticmethod
+    async def ws_video(websocket: WebSocket):
+        """
+        A WebSocket endpoint for video streaming. Placeholder for actual video streaming logic.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+        """
         # TODO: update websocket send function (send -> send_text...)
         # TODO: try on Rpi
         # capture = cv2.VideoCapture(0)
@@ -193,25 +267,57 @@ class Websockets:
         # capture.release()
         pass
 
-    async def ws_external_humidity(websocket, delay=1):
+    @staticmethod
+    async def ws_external_humidity(websocket: WebSocket, delay: int = 1):
+        """
+        A WebSocket endpoint for external humidity sensor data. Placeholder for actual sensor data retrieval.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+            delay (int): The delay between data sends. Defaults to 1 second.
+        """
         while True:
             # TODO: try on Rpi
             await websocket.send_text(str(Websockets.bme680.humidity))
             await asyncio.sleep(delay)
 
-    async def ws_external_temperature(websocket, delay=1):
+    @staticmethod
+    async def ws_external_temperature(websocket: WebSocket, delay: int = 1):
+        """
+        A WebSocket endpoint for external temperature sensor data. Placeholder for actual sensor data retrieval.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+            delay (int): The delay between data sends. Defaults to 1 second.
+        """
         while True:
             # TODO: try on Rpi
             await websocket.send_text(str(Websockets.bme680.temperature))
             await asyncio.sleep(delay)
 
-    async def ws_external_pressure(websocket, delay=1):
+    @staticmethod
+    async def ws_external_pressure(websocket: WebSocket, delay: int = 1):
+        """
+        A WebSocket endpoint for external pressure sensor data. Placeholder for actual sensor data retrieval.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+            delay (int): The delay between data sends. Defaults to 1 second.
+        """
         while True:
             # TODO: try on Rpi
             await websocket.send_text(str(Websockets.bme680.pressure))
             await asyncio.sleep(delay)
 
-    async def ws_internal_cpu_temperature(websocket, delay=1):
+    @staticmethod
+    async def ws_internal_cpu_temperature(websocket: WebSocket, delay: int = 1):
+        """
+        A WebSocket endpoint for internal CPU temperature data. Placeholder for actual data retrieval.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+            delay (int): The delay between data sends. Defaults to 1 second.
+        """
         while True:
             # TODO: try on Rpi
             cpu_temp = os.popen("vcgencmd measure_temp").readline()
@@ -219,13 +325,29 @@ class Websockets:
             await websocket.send_text(str(round(cpu_temp_float, 2)))
             await asyncio.sleep(delay)
 
-    async def ws_internal_cpu_usage(websocket, delay=1):
+    @staticmethod
+    async def ws_internal_cpu_usage(websocket: WebSocket, delay: int = 1):
+        """
+        A WebSocket endpoint for internal CPU usage data. Placeholder for actual data retrieval.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+            delay (int): The delay between data sends. Defaults to 1 second.
+        """
         while True:
             # TODO: try on Rpi
             await websocket.send_text(str(round(psutil.cpu_percent(interval=1), 2)))
             await asyncio.sleep(delay)
 
-    async def ws_internal_ram_usage(websocket, delay=1):
+    @staticmethod
+    async def ws_internal_ram_usage(websocket: WebSocket, delay: int = 1):
+        """
+        A WebSocket endpoint for internal RAM usage data. Placeholder for actual data retrieval.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection instance.
+            delay (int): The delay between data sends. Defaults to 1 second.
+        """
         while True:
             # TODO: try on Rpi
             await websocket.send_text(str(round(psutil.virtual_memory().percent, 2)))
