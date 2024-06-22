@@ -2,6 +2,8 @@
 
 > This repository contains the source code for the embed part of the project.
 
+![Schema](/assets/schema.jpg)
+
 ## Control - python
 
 The control part of the project is responsible for getting the decisions of the user and the manual controller (movement inputs).
