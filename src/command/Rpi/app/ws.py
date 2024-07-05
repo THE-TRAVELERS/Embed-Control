@@ -56,7 +56,6 @@ class Websockets:
         "Board I2C initialized successfully.",
         "Failed to initialize board I2C. Please ensure that the program is run from a Raspberry Pi.",
     )
-    @staticmethod
     def init_board_i2c() -> int:
         """
         Initializes the board I2C interface. Placeholder for Raspberry Pi I2C initialization.
@@ -94,7 +93,6 @@ class Websockets:
         "(General) Websockets initialized successfully.",
         "(General) Failed to initialize Websockets.",
     )
-    @staticmethod
     def init_ws_general() -> int:
         """
         Initializes general WebSocket services.
@@ -128,7 +126,6 @@ class Websockets:
         "(External Sensor) Websockets initialized successfully.",
         "(External Sensor) Failed to initialize Websockets.",
     )
-    @staticmethod
     def init_ws_external_sensor() -> int:
         """
         Initializes external sensor WebSocket services.
@@ -162,7 +159,6 @@ class Websockets:
         "(Internal Sensor) Websockets initialized successfully.",
         "(Internal Sensor) Failed to initialize Websockets.",
     )
-    @staticmethod
     def init_ws_internal_sensor() -> int:
         """
         Initializes internal sensor WebSocket services.
@@ -191,7 +187,6 @@ class Websockets:
         except Exception:
             return 1
 
-    @staticmethod
     def setup_websocket_service(
         ws_category: str,
         ws_name: str,
@@ -221,7 +216,6 @@ class Websockets:
 
         return wrapper
 
-    @staticmethod
     async def ws_debug(websocket: WebSocket):
         """
         A WebSocket endpoint for debugging purposes. Sends an incrementing count every second.
@@ -235,7 +229,6 @@ class Websockets:
             count += 1
             await asyncio.sleep(1)
 
-    @staticmethod
     async def ws_controller(websocket: WebSocket, default_speed: float = 0.0002):
         """
         A WebSocket endpoint for controlling the device. Placeholder for actual control logic.
@@ -251,7 +244,6 @@ class Websockets:
             await asyncio.sleep(default_speed)
             # TODO: try using Rpi
 
-    @staticmethod
     async def ws_video(websocket: WebSocket):
         """
         A WebSocket endpoint for video streaming. Placeholder for actual video streaming logic.
@@ -270,10 +262,9 @@ class Websockets:
             await websocket.send_text(data)
         capture.release()
         # TODO: try using Rpi
-        
+
         # pass
 
-    @staticmethod
     async def ws_external_humidity(websocket: WebSocket, delay: int = 1):
         """
         A WebSocket endpoint for external humidity sensor data. Placeholder for actual sensor data retrieval.
@@ -287,7 +278,6 @@ class Websockets:
             await websocket.send_text(str(Websockets.bme680.humidity))
             await asyncio.sleep(delay)
 
-    @staticmethod
     async def ws_external_temperature(websocket: WebSocket, delay: int = 1):
         """
         A WebSocket endpoint for external temperature sensor data. Placeholder for actual sensor data retrieval.
@@ -301,7 +291,6 @@ class Websockets:
             await websocket.send_text(str(Websockets.bme680.temperature))
             await asyncio.sleep(delay)
 
-    @staticmethod
     async def ws_external_pressure(websocket: WebSocket, delay: int = 1):
         """
         A WebSocket endpoint for external pressure sensor data. Placeholder for actual sensor data retrieval.
@@ -315,7 +304,6 @@ class Websockets:
             await websocket.send_text(str(Websockets.bme680.pressure))
             await asyncio.sleep(delay)
 
-    @staticmethod
     async def ws_internal_cpu_temperature(websocket: WebSocket, delay: int = 1):
         """
         A WebSocket endpoint for internal CPU temperature data. Placeholder for actual data retrieval.
@@ -331,7 +319,6 @@ class Websockets:
             await websocket.send_text(str(round(cpu_temp_float, 2)))
             await asyncio.sleep(delay)
 
-    @staticmethod
     async def ws_internal_cpu_usage(websocket: WebSocket, delay: int = 1):
         """
         A WebSocket endpoint for internal CPU usage data. Placeholder for actual data retrieval.
@@ -345,7 +332,6 @@ class Websockets:
             await websocket.send_text(str(round(psutil.cpu_percent(interval=1), 2)))
             await asyncio.sleep(delay)
 
-    @staticmethod
     async def ws_internal_ram_usage(websocket: WebSocket, delay: int = 1):
         """
         A WebSocket endpoint for internal RAM usage data. Placeholder for actual data retrieval.
