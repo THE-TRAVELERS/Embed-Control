@@ -79,10 +79,10 @@ class Websockets:
                 )
             )
 
-            Websockets.i2c = I2C(board.SCL, board.SDA)
-            Websockets.bme680 = adafruit_bme680.Adafruit_BME680_I2C(
-                Websockets.i2c, debug=False
-            )
+            # Websockets.i2c = I2C(board.SCL, board.SDA)
+            # Websockets.bme680 = adafruit_bme680.Adafruit_BME680_I2C(
+            #     Websockets.i2c, debug=False
+            # )
             # TODO: try using Rpi
             return 0
         except Exception:
