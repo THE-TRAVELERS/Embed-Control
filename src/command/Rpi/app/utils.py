@@ -13,7 +13,6 @@ class Utils:
     and listing spinner types.
     """
 
-    @staticmethod
     def clear_console() -> None:
         """
         Clears the console screen.
@@ -22,7 +21,6 @@ class Utils:
         """
         os.system("clear")
 
-    @staticmethod
     def unwrap_message(message: List[str]) -> str:
         """
         Unwraps the first string from a list of strings, removing the leading character and stripping quotes.
@@ -42,7 +40,6 @@ class Utils:
             raise ValueError("Input must be a list of strings")
         return message[0][1:].strip("'")
 
-    @staticmethod
     def loadings_demo(delay: int = 3) -> None:
         """
         Demonstrates various loading spinners with a dummy job.
@@ -131,7 +128,6 @@ class Utils:
         else:
             raise OSError("Unsupported OS")
 
-    @staticmethod
     def read_variable(var_name: str) -> str:
         """
         Reads an environment variable.
