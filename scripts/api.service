@@ -1,0 +1,15 @@
+[Unit]
+Description=TRAVELERS API Service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c 'source /home/admin/Documents/Env/api_env/bin/activate && fastapi run /home/admin/Documents/Projects/Embed-Control/src/command/Rpi/app/main.py --port 8000'
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=api_service
+User=admin
+WorkingDirectory=/home/admin/Documents/Projects/Embed-Control/src/command/Rpi
+
+[Install]
+WantedBy=multi-user.target
