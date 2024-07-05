@@ -12,11 +12,12 @@ from .i2c import I2CUtils
 from .utils import Utils
 
 # TODO: try using Rpi
-# import base64
-# import cv2
-# import board
-# from busio import I2C
-# import adafruit_bme680
+import base64
+import cv2
+import board
+from busio import I2C
+import adafruit_bme680
+# TODO: try using Rpi
 
 
 @Utils.loading(
@@ -46,8 +47,9 @@ class Websockets:
     controller_socket: socket.socket
 
     # TODO: try using Rpi
-    # i2c: I2C
-    # bme680: adafruit_bme680.Adafruit_BME680_I2C
+    i2c: I2C
+    bme680: adafruit_bme680.Adafruit_BME680_I2C
+    # TODO: try using Rpi
 
     @Utils.loading(
         "Initializing board I2C...",
@@ -64,24 +66,25 @@ class Websockets:
         """
         try:
             # TODO: try using Rpi
-            # Websockets.i2c_utils = I2CUtils()
-            # if Websockets.i2c_utils.init_bus() != 0:
-            #     return 1
+            Websockets.i2c_utils = I2CUtils()
+            if Websockets.i2c_utils.init_bus() != 0:
+                return 1
 
-            # Websockets.controller_socket = socket.socket(
-            #     family=socket.AF_INET, type=socket.SOCK_DGRAM
-            # )
-            # Websockets.controller_socket.bind(
-            #     (
-            #         Utils.read_variable("LISTEN_ADDRESS"),
-            #         int(Utils.read_variable("CONTROLLER_PORT")),
-            #     )
-            # )
+            Websockets.controller_socket = socket.socket(
+                family=socket.AF_INET, type=socket.SOCK_DGRAM
+            )
+            Websockets.controller_socket.bind(
+                (
+                    Utils.read_variable("LISTEN_ADDRESS"),
+                    int(Utils.read_variable("CONTROLLER_PORT")),
+                )
+            )
 
-            # Websockets.i2c = I2C(board.SCL, board.SDA)
-            # Websockets.bme680 = adafruit_bme680.Adafruit_BME680_I2C(
-            #     Websockets.i2c, debug=False
-            # )
+            Websockets.i2c = I2C(board.SCL, board.SDA)
+            Websockets.bme680 = adafruit_bme680.Adafruit_BME680_I2C(
+                Websockets.i2c, debug=False
+            )
+            # TODO: try using Rpi
             return 0
         except Exception:
             return 1
@@ -243,9 +246,10 @@ class Websockets:
         """
         while True:
             # TODO: try on Rpi
-            # recept = Utils.unwrap_message(Websockets.controller_socket.recvfrom(1024))
-            # Websockets.i2c_utils.write_data(recept)
+            recept = Utils.unwrap_message(Websockets.controller_socket.recvfrom(1024))
+            Websockets.i2c_utils.write_data(recept)
             await asyncio.sleep(default_speed)
+            # TODO: try using Rpi
 
     @staticmethod
     async def ws_video(websocket: WebSocket):
@@ -257,15 +261,17 @@ class Websockets:
         """
         # TODO: update websocket send function (send -> send_text...)
         # TODO: try on Rpi
-        # capture = cv2.VideoCapture(0)
-        # while capture.isOpened():
-        #     _, frame = capture.read()
-        #     encoded = cv2.imencode(".jpg", frame)[1]
-        #     data = str(base64.b64encode(encoded))
-        #     data = data[2 : len(data) - 1]
-        #     await websocket.send(data)
-        # capture.release()
-        pass
+        capture = cv2.VideoCapture(0)
+        while capture.isOpened():
+            _, frame = capture.read()
+            encoded = cv2.imencode(".jpg", frame)[1]
+            data = str(base64.b64encode(encoded))
+            data = data[2 : len(data) - 1]
+            await websocket.send_text(data)
+        capture.release()
+        # TODO: try using Rpi
+        
+        # pass
 
     @staticmethod
     async def ws_external_humidity(websocket: WebSocket, delay: int = 1):
