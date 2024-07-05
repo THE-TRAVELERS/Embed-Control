@@ -12,6 +12,11 @@
 # By default this script does nothing.
 
 #####################################################################
+# Start the NetworkManager service
+
+sudo systemctl start NetworkManager
+
+#####################################################################
 # Start the wifi hotspot
 
 sudo nmcli device wifi hotspot ssid ntw_TRAVELERS password TRAVELERS
