@@ -14,7 +14,7 @@
 #####################################################################
 # Start the NetworkManager service
 
-sudo systemctl start NetworkManager
+sudo service NetworkManager start
 
 #####################################################################
 # Start the wifi hotspot

@@ -31,4 +31,4 @@ alias path='echo -e ${PATH//:/\\n}'
 
 # Create wifi hotspot
 alias hotspot-on="sudo nmcli device wifi hotspot ssid ntw_TRAVELERS password TRAVELERS"
-alias hotspot-off="sudo nmcli device wifi hotspot con-name ntw_TRAVELERS"
+alias hotspot-off="sudo nmcli connection down Hotspot"

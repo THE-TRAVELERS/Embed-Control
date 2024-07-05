@@ -17,6 +17,7 @@ import cv2
 import board
 from busio import I2C
 import adafruit_bme680
+from picamera2 import Picamera2
 # TODO: try using Rpi
 
 
@@ -251,19 +252,27 @@ class Websockets:
         Args:
             websocket (WebSocket): The WebSocket connection instance.
         """
-        # TODO: update websocket send function (send -> send_text...)
         # TODO: try on Rpi
-        capture = cv2.VideoCapture(0)
-        while capture.isOpened():
-            _, frame = capture.read()
-            encoded = cv2.imencode(".jpg", frame)[1]
-            data = str(base64.b64encode(encoded))
-            data = data[2 : len(data) - 1]
-            await websocket.send_text(data)
-        capture.release()
-        # TODO: try using Rpi
+        piCam = Picamera2()
+        cap = cv2.VideoCapture(0)
 
-        # pass
+        piCam.video_configuration.main.size=(640,480)
+        piCam.video_configuration.main.format="RGB888"
+        piCam.video_configuration.align()
+
+        piCam.configure("video")
+
+        piCam.start()
+
+        while cap.isOpened():
+            frame = piCam.capture_array()
+            _, encoded = cv2.imencode(".jpg", frame)
+            data = str(base64.b64encode(encoded))
+            data = data[2 : len(data) - 1] # remove the quotes from the encoding
+            await websocket.send_text(data)
+
+        piCam.stop()
+        cap.release()
 
     async def ws_external_humidity(websocket: WebSocket, delay: int = 1):
         """
