@@ -33,9 +33,19 @@ echo "----- Setting up the virtual environment -----"
 
 sudo apt install libcap-dev
 cd ~/Documents/Env
-python3 -m venv -m venv --system-site-packages api_env
+python3 -m venv --system-site-packages api_env
 source api_env/bin/activate
 cd ~/Documents/Projects/Embed-Control/src/command/Rpi/
+
+# pip install opencv-python
+# pip install picamera2
+# pip install fastapi
+# pip install smbus2
+# pip install halo
+# pip install psutil
+# pip install adafruit-blinka
+# pip install adafruit-circuitpython-bme680
+
 pip install -r requirements.txt
 
 echo "----- Finished setting up the virtual environment -----\n"
@@ -50,6 +60,14 @@ sudo systemctl enable api.service
 sudo systemctl start api.service
 
 echo "----- Finished setting up the service -----\n"
+
+# Adding Neofetch
+echo "----- Adding Neofetch -----"
+
+sudo apt install neofetch
+echo "neofetch" >> ~/.bashrc
+
+echo "----- Finished adding Neofetch -----\n"
 
 # Rebooting the system
 echo "----- Rebooting the system in 10s -----"

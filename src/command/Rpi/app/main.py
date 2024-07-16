@@ -76,6 +76,9 @@ def init_websockets() -> None:
     if ws.Websockets.init_board_i2c() != 0:
         exit(1)
 
+    if ws.Websockets.init_camera() != 0:
+        exit(1)
+
     if ws.Websockets.init_ws_general() != 0:
         exit(1)
 

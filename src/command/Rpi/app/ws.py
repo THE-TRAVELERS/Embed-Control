@@ -1,5 +1,5 @@
 from typing import Callable, Coroutine
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from dotenv import load_dotenv
 from functools import wraps
 import asyncio
@@ -14,7 +14,8 @@ from .utils import Utils
 # TODO: try using Rpi
 import base64
 import cv2
-import board
+
+# import board
 from busio import I2C
 import adafruit_bme680
 from picamera2 import Picamera2
@@ -46,6 +47,7 @@ class Websockets:
 
     i2c_utils: I2CUtils
     controller_socket: socket.socket
+    piCam = None
 
     # TODO: try using Rpi
     i2c: I2C
@@ -85,6 +87,31 @@ class Websockets:
             #     Websockets.i2c, debug=False
             # )
             # TODO: try using Rpi
+            return 0
+        except Exception:
+            return 1
+
+    @Utils.loading(
+        "Initializing camera...",
+        "Camera initialized successfully.",
+        "Failed to initialize camera. Please ensure that the program is run from a Raspberry Pi.",
+    )
+    def init_camera() -> int:
+        """
+        Initializes the camera. Placeholder for Raspberry Pi camera initialization.
+
+        Returns:
+            int: 0 if initialization was successful, 1 otherwise.
+        """
+        try:
+            Websockets.piCam = Picamera2()
+
+            Websockets.piCam.video_configuration.main.size = (640, 480)
+            Websockets.piCam.video_configuration.main.format = "RGB888"
+            Websockets.piCam.video_configuration.align()
+
+            Websockets.piCam.configure("video")
+
             return 0
         except Exception:
             return 1
@@ -253,26 +280,25 @@ class Websockets:
             websocket (WebSocket): The WebSocket connection instance.
         """
         # TODO: try on Rpi
-        piCam = Picamera2()
-        cap = cv2.VideoCapture(0)
+        print("passed")
 
-        piCam.video_configuration.main.size=(640,480)
-        piCam.video_configuration.main.format="RGB888"
-        piCam.video_configuration.align()
+        try:
+            Websockets.piCam.start()
+            print("sent")
+            while True:
+                frame = Websockets.piCam.capture_array()
+                _, encoded = cv2.imencode(".jpg", frame)
+                data = str(base64.b64encode(encoded))
+                data = data[2 : len(data) - 1]  # remove the quotes from the encoding
+                await websocket.send_text(data)
+        except WebSocketDisconnect:
+            print("exited")
+            Websockets.piCam.stop()
+            print("INFO X:  connection closed")
 
-        piCam.configure("video")
-
-        piCam.start()
-
-        while cap.isOpened():
-            frame = piCam.capture_array()
-            _, encoded = cv2.imencode(".jpg", frame)
-            data = str(base64.b64encode(encoded))
-            data = data[2 : len(data) - 1] # remove the quotes from the encoding
-            await websocket.send_text(data)
-
-        piCam.stop()
-        cap.release()
+        except Exception as e:
+            print(f"ERROR X: Failed to capture frame: {e}")
+            Websockets.piCam.stop()
 
     async def ws_external_humidity(websocket: WebSocket, delay: int = 1):
         """
