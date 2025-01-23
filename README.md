@@ -34,6 +34,14 @@ Docker is a tool designed to make it easier to create, deploy, and run applicati
 
 On the Raspberry Pi, the installation is a little bit different from the common OS. The official documentation is **[here](https://docs.docker.com/engine/install/debian/)**.
 
+The all-in-one command to install Docker on the Raspberry Pi is:
+
+```bash
+curl -fsSL https://get.docker.com | sh
+```
+
+TODO: change to clean install.
+
 Once set up, clone the repository:
 
 ```bash
