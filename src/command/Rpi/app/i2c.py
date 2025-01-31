@@ -1,12 +1,15 @@
-import smbus2 as smbus  # ! smbus2 not tested yet initially used smbus
+from smbus2 import SMBus
 from typing import Optional
+
+I2C_BUS = 1
+I2C_SLAVE_ADDRESS = 0x11
 
 
 class I2CUtils:
-    def __init__(self, channel=1, slave_address=0x11):
+    def __init__(self, channel=I2C_BUS, slave_address=I2C_SLAVE_ADDRESS):
         self.channel: int = channel
         self.slave_address: int = slave_address
-        self.bus: Optional[smbus.SMBus] = None
+        self.bus: Optional[SMBus] = None
 
     def init_bus(self) -> int:
         """Initializes the I2C bus.
@@ -15,7 +18,7 @@ class I2CUtils:
             0 if the bus was successfully initialized, 1 otherwise.
         """
         try:
-            self.bus = smbus.SMBus(self.channel)
+            self.bus = SMBus(self.channel)
             return 0
         except Exception:
             return 1
