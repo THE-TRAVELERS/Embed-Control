@@ -4,8 +4,13 @@ services:
     image: travelers_api
     container_name: travelers_api
     restart: unless-stopped
-    command: ["fastapi", "run", "/app/main.py", "--port", "8000"]
+    command: ['fastapi', 'run', '/app/main.py', '--port', '8000']
+    environment:
+      - LD_LIBRARY_PATH=/opt/vc/lib
     ports:
-      - "8765:8000"
+      - '8765:8000'
     volumes:
       - ./app:/app
+      # Picamera & dependencies
+      - /dev/vchiq:/dev/vchiq
+      - /opt/vc:/opt/vc
