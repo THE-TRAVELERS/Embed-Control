@@ -2,10 +2,15 @@ from datetime import datetime
 import logging
 import os
 
-from path import PathTo
+DEFUALT_LOG_LEVEL = logging.DEBUG
+DEFAULT_LOG_PATH = "logs"
 
 
 class Logs:
+    """
+    Provides methods for starting and creating loggers.
+    """
+
     @classmethod
     def start(cls, level: int = logging.DEBUG) -> None:
         """
@@ -21,17 +26,19 @@ class Logs:
         )
 
     @classmethod
-    def create_logger(cls, level: int = logging.DEBUG) -> None:
+    def create_logger(
+        cls, level: int = DEFUALT_LOG_LEVEL, path: str = DEFAULT_LOG_PATH
+    ) -> None:
         """
         Creates a logger with the specified log level.
 
         Args:
             :param level: The log level (default is logging.DEBUG).
         """
-        os.makedirs(PathTo.LOGS_FOLDER, exist_ok=True)
+        os.makedirs(path, exist_ok=True)
 
         log_filename = datetime.now().strftime("%Y-%m-%d") + ".log"
-        log_file_path = os.path.join(PathTo.LOGS_FOLDER, log_filename)
+        log_file_path = os.path.join(path, log_filename)
 
         logger = logging.getLogger()
         logger.setLevel(level)
