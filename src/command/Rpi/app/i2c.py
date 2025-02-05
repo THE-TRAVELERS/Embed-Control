@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 import board
 from busio import I2C
-import adafruit_bme680
+# import adafruit_bme680
 
 I2C_CHANNEL = 1
 I2C_SLAVE_ADDRESS = 0x11
@@ -22,7 +22,7 @@ class I2CUtils:
     bus: Optional[SMBus] = SMBus(I2C_CHANNEL)
 
     i2c: I2C = I2C(board.SCL, board.SDA)
-    bme680: adafruit_bme680.Adafruit_BME680_I2C
+    bme680: Any
 
     camera: Any
 
@@ -36,9 +36,10 @@ class I2CUtils:
         """
         logging.debug(f"[SENSORS] BME680 settings: debug={debug}")
         try:
-            cls.bme680 = adafruit_bme680.Adafruit_BME680_I2C(cls.i2c, debug=debug)
-            logging.info("[SENSORS] BME680 initialized.")
-            return True
+            # cls.bme680 = adafruit_bme680.Adafruit_BME680_I2C(cls.i2c, debug=debug)
+            logging.info("[SENSORS] BME680 Deprecated.")
+            return False
+            # return True
         except Exception as e:
             logging.error(f"[SENSORS] Error initializing BME680: {e}")
             return False

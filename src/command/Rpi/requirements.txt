@@ -1,7 +1,6 @@
-adafruit-circuitpython-bme680==3.7.12 
 fastapi[standard]==0.115.8 
 gpiozero==2.0.1
-halo==0.0.31
 opencv-python==4.11.0.86 
 smbus2==0.4.3
 psutil==6.1.1 
+board==1.0
