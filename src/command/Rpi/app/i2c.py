@@ -1,7 +1,6 @@
 import logging
 from smbus2 import SMBus
-from typing import Optional
-from picamera2 import Picamera2
+from typing import Any, Optional
 
 import board
 from busio import I2C
@@ -25,10 +24,10 @@ class I2CUtils:
     i2c: I2C = I2C(board.SCL, board.SDA)
     bme680: adafruit_bme680.Adafruit_BME680_I2C
 
-    camera: Picamera2
+    camera: Any
 
     @classmethod
-    def init_bme680(cls, debug: bool = False) -> None:
+    def init_bme680(cls, debug: bool = False) -> bool:
         """
         Initializes the BME680 sensor.
 
@@ -36,8 +35,13 @@ class I2CUtils:
             debug: Whether to enable debug mode.
         """
         logging.debug(f"[SENSORS] BME680 settings: debug={debug}")
-        cls.bme680 = adafruit_bme680.Adafruit_BME680_I2C(cls.i2c, debug=debug)
-        logging.info("[SENSORS] BME680 initialized.")
+        try:
+            cls.bme680 = adafruit_bme680.Adafruit_BME680_I2C(cls.i2c, debug=debug)
+            logging.info("[SENSORS] BME680 initialized.")
+            return True
+        except Exception as e:
+            logging.error(f"[SENSORS] Error initializing BME680: {e}")
+            return False
 
     @classmethod
     def init_camera(
@@ -45,7 +49,7 @@ class I2CUtils:
         width: int = DEFAULT_CAMERA_WIDTH,
         height: int = DEFAULT_CAMERA_HEIGHT,
         format: str = DEFAULT_CAMERA_FORMAT,
-    ) -> None:
+    ) -> bool:
         """
         Initializes the camera.
 
@@ -57,13 +61,20 @@ class I2CUtils:
         logging.debug(
             f"[SENSORS] Picamera settings: width={width}, height={height}, format={format}"
         )
-        cls.camera = Picamera2()
+        try:
+            from picamera2 import Picamera2
 
-        cls.camera.video_configuration.main.size = (width, height)
-        cls.camera.video_configuration.main.format = format
-        cls.camera.video_configuration.align()
-        cls.camera.configure("video")
-        logging.info("[SENSORS] Picamera initialized.")
+            cls.camera = Picamera2()
+
+            cls.camera.video_configuration.main.size = (width, height)
+            cls.camera.video_configuration.main.format = format
+            cls.camera.video_configuration.align()
+            cls.camera.configure("video")
+            logging.info("[SENSORS] Picamera initialized.")
+            return True
+        except Exception as e:
+            logging.error(f"[SENSORS] Error initializing Picamera: {e}")
+            return False
 
     def convert_string_to_bytes(self, val: str) -> list[int]:
         """Converts a string to a list of bytes.
@@ -73,12 +84,7 @@ class I2CUtils:
 
         Returns:
             A list of integers representing the ASCII values of the characters in the string.
-
-        Raises:
-            TypeError: If the input is not a string.
         """
-        if not isinstance(val, str):
-            raise TypeError("Input must be a string")
         return [ord(c) for c in val]
 
     def write_data(self, value: str):

@@ -1,3 +1,4 @@
+import logging
 from fastapi import WebSocket, WebSocketDisconnect
 import asyncio
 import psutil
@@ -33,15 +34,24 @@ class WebSocketsServices:
 
         Args:
             websocket (WebSocket): The WebSocket connection instance.
-            default_speed (float): The default speed for the control loop. Defaults to 0.0002.
+            delay (float): The default speed for the control loop. Defaults to 0.0002.
         """
-        while True:
-            # TODO: Not tested, forward to websocket and format (x,y)
-            recieved_data = await websocket.receive_text()
-            I2CUtils.write_data(recieved_data)
-            await asyncio.sleep(delay)
+        DEFAULT_STOP_ORDER = "0,0"
+        try:
+            while True:
+                # TODO: Not tested, forward to websocket and format (x,y)
+                recieved_orders = await websocket.receive_text()
+                I2CUtils.write_data(recieved_orders)
+                # await asyncio.sleep(delay)  # May not be useful
+        except WebSocketDisconnect:
+            I2CUtils.write_data(DEFAULT_STOP_ORDER)
+            logging.info("[WEBSOCKETS] Controller stopped.")
+            raise WebSocketDisconnect
+        except Exception as e:
+            logging.error("[WEBSOCKETS] An error occured in the controller websocket.")
+            raise e
 
-    async def ws_video(websocket: WebSocket):
+    async def ws_camera(websocket: WebSocket):
         """
         A WebSocket endpoint for video streaming. Placeholder for actual video streaming logic.
 
@@ -51,7 +61,6 @@ class WebSocketsServices:
         # TODO: Not tested
         try:
             I2CUtils.camera.start()
-            print("sent")
             while True:
                 frame = I2CUtils.camera.capture_array()
                 _, encoded = cv2.imencode(".jpg", frame)
@@ -59,13 +68,12 @@ class WebSocketsServices:
                 data = data[2 : len(data) - 1]  # remove the quotes from the encoding
                 await websocket.send_text(data)
         except WebSocketDisconnect:
-            print("exited")
             I2CUtils.camera.stop()
-            print("INFO X:  connection closed")
-
+            logging.info("[WEBSOCKETS] Video stream stopped.")
+            raise WebSocketDisconnect
         except Exception as e:
-            print(f"ERROR X: Failed to capture frame: {e}")
             I2CUtils.camera.stop()
+            logging.error(f"[WEBSOCKETS] Error in video stream: {e}")
 
     async def ws_external_humidity(
         websocket: WebSocket, delay: int = DEFAULT_SENSOR_UPDATE_INTERVAL
