@@ -1,3 +1,4 @@
+import logging
 from smbus2 import SMBus
 from typing import Optional
 from picamera2 import Picamera2
@@ -8,6 +9,9 @@ import adafruit_bme680
 
 I2C_CHANNEL = 1
 I2C_SLAVE_ADDRESS = 0x11
+DEFAULT_CAMERA_WIDTH = 640
+DEFAULT_CAMERA_HEIGHT = 480
+DEFAULT_CAMERA_FORMAT = "RGB888"
 
 
 class I2CUtils:
@@ -24,23 +28,42 @@ class I2CUtils:
     camera: Picamera2
 
     @classmethod
-    def init_bme680(cls) -> None:
+    def init_bme680(cls, debug: bool = False) -> None:
         """
         Initializes the BME680 sensor.
+
+        Args:
+            debug: Whether to enable debug mode.
         """
-        cls.bme680 = adafruit_bme680.Adafruit_BME680_I2C(cls.i2c, debug=False)
+        logging.debug(f"[SENSORS] BME680 settings: debug={debug}")
+        cls.bme680 = adafruit_bme680.Adafruit_BME680_I2C(cls.i2c, debug=debug)
+        logging.info("[SENSORS] BME680 initialized.")
 
     @classmethod
-    def init_camera(cls) -> None:
+    def init_camera(
+        cls,
+        width: int = DEFAULT_CAMERA_WIDTH,
+        height: int = DEFAULT_CAMERA_HEIGHT,
+        format: str = DEFAULT_CAMERA_FORMAT,
+    ) -> None:
         """
         Initializes the camera.
+
+        Args:
+            width: The width of the camera feed.
+            height: The height of the camera feed.
+            format: The format of the camera feed.
         """
+        logging.debug(
+            f"[SENSORS] Picamera settings: width={width}, height={height}, format={format}"
+        )
         cls.camera = Picamera2()
 
-        cls.camera.video_configuration.main.size = (640, 480)
-        cls.camera.video_configuration.main.format = "RGB888"
+        cls.camera.video_configuration.main.size = (width, height)
+        cls.camera.video_configuration.main.format = format
         cls.camera.video_configuration.align()
         cls.camera.configure("video")
+        logging.info("[SENSORS] Picamera initialized.")
 
     def convert_string_to_bytes(self, val: str) -> list[int]:
         """Converts a string to a list of bytes.
