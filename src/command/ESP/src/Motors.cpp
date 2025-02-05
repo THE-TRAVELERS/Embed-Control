@@ -12,8 +12,8 @@
 
 // I2C address of the esp
 #define I2C_DEV_ADDR 0x52
-#define relaisRight 1
-#define relaisLeft 2
+int relaisRight =1;
+int relaisLeft=2;
 
 // Servo object to control the ESC
 Servo esc;
@@ -26,40 +26,81 @@ volatile boolean receiveFlag = false; // Drapeau pour la réception de données 
 // I2C received data
 char temp[32]; 
 
-
 // joystick position : 
-float x_sign;
-float y_sign;
+float x;
+float y;
 
 
-void convert_sign(float x, float y){
- // convert the y value : 
-  // -1 1 
-  // -127 128
-  // 0 255 
-  y_sign = (float)y*127/128;
-  Serial.print("Sign y : ");
-  Serial.println(y_sign);
-  
-  x_sign = (float)x*127/128;
-  Serial.print("Sign x : ");
-  Serial.println(x_sign);
-  convert_unsign(x_sign,y_sign);
-}
 
-void convert_unsign(float x, float y){
-  y_sign = (float)sqrt(y*y)*255;// absolute value to have 0 255 positive
-  Serial.print("Unsign y : ");
-  Serial.println(y_sign);
-  x_sign = sqrt(x*x)*255; // absolute value to have 0 255 positive
-  Serial.print("Unsign x : ");
-  Serial.println(x_sign);
-  
-}
+// class for the motors : 
+class Motor {
+  private: 
+  // the ESC objects
+  Servo esc;
+  Servo esc2;
 
+  // the value of the joystick
+  float xSign;
+  float ySign;
 
-//Function for reading the received data
-void onReceive(int len){
+  // the relay pins 
+  int relaisRight;
+  int relaisLeft;
+
+  // the speed of the motors
+  float rightSpeed;
+  float leftSpeed;
+
+  // Constructor : 
+  Motor (int relaisRight, int relaisLeft, Servo esc, Servo esc2) {
+    this->relaisRight = relaisRight;
+    this->relaisLeft = relaisLeft;
+    this->esc = esc;
+    this->esc2 = esc2;
+  }
+  public:
+  // Update the direction of the servo motors :
+  void updateDirection(){
+    // we only consider y for the  direction 
+    if(ySign<0){
+      digitalWrite(relaisRight,HIGH);
+      digitalWrite(relaisLeft,HIGH);
+    }
+    else{
+      digitalWrite(relaisRight,LOW);
+      digitalWrite(relaisLeft,LOW);
+    }
+  }
+  // function to convert receive float to sign 8 bytes float 
+  void convert_unsign(float x, float y){
+    ySign = (float)sqrt(y*y)*255;// absolute value to have 0 255 positive
+    Serial.print("Unsign y : ");
+    Serial.println(ySign);
+    xSign = sqrt(x*x)*255; // absolute value to have 0 255 positive
+    Serial.print("Unsign x : ");
+    Serial.println(xSign);
+  }
+
+  // function to convert the received float to unsigned 8 bytes float
+  void convert_sign(float x, float y){
+    // convert the y value : 
+    // -1 1 
+    // -127 128
+    // 0 255 
+    ySign = (float)y*127/128;
+    Serial.print("Sign y : ");
+    Serial.println(ySign);
+    
+    xSign = (float)x*127/128;
+    Serial.print("Sign x : ");
+    Serial.println(xSign);
+
+    // make the intensity on unsigned
+    convert_unsign(xSign,ySign);
+  }
+
+  void stringToFloat(int len){
+    // convert the string to float :
     for(int j=0; j<len; j++){
         temp[j] = Wire.read();
     }
@@ -67,36 +108,34 @@ void onReceive(int len){
     if(separator!=0){
         float a = atof(temp);
       	float b = atof(separator+1);
-      	convert_sign(a,b);
+    }
+  }
+};
 
-      	analogWrite(5,x_sign);
-      	analogWrite(6,y_sign);
-        updateDirection();
-    }    receiveFlag = true;
+//Function for reading the received data
+void onReceive(int len){
+  // TODO : Make different case for different input values 
+  for(int j=0; j<len; j++){
+      temp[j] = Wire.read();
+  }
+  char* separator = strchr(temp,',');
+  if(separator!=0){
+      x = atof(temp);
+      y = atof(separator+1);
+  }
+// TODO : Make different case for different input values 
+  receiveFlag = true;
 }
 
-
-
-void updateDirection(){
-  // we only consider y for the  direction 
-  if(y_sign<0){
-    digitalWrite(relaisRight,HIGH);
-    digitalWrite(relaisLeft,HIGH);
-  }
-  else{
-    digitalWrite(relaisRight,LOW);
-    digitalWrite(relaisLeft,LOW);
-  }
-    
-}
 
 void setup(){
     Wire.onReceive(onReceive);
     Wire.begin((uint8_t)I2C_DEV_ADDR);
     Serial.begin(9600);
+
+
   	// setup the servo pinmode
-  	pinMode(6,OUTPUT);
-  	pinMode(5,OUTPUT);
+
   
   	// setup the relais pins mode
   	pinMode(relaisRight,OUTPUT);
