@@ -1,7 +1,6 @@
 services:
   api:
     build: .
-    image: travelers_api
     container_name: travelers_api
     restart: unless-stopped
     command: ['fastapi', 'run', '/app/main.py', '--port', '8000']
@@ -12,5 +11,5 @@ services:
     volumes:
       - ./app:/app
       # Picamera & dependencies
-      - /dev/vchiq:/dev/vchiq
-      - /opt/vc:/opt/vc
+      # - /dev/vchiq:/dev/vchiq
+      # - /opt/vc:/opt/vc
