@@ -2,8 +2,8 @@ import logging
 from smbus2 import SMBus
 from typing import Any, Optional
 
-import board
-from busio import I2C
+# import board
+# from busio import I2C
 # import adafruit_bme680
 
 I2C_CHANNEL = 1
@@ -21,7 +21,7 @@ class I2CUtils:
     slave_address: int = I2C_SLAVE_ADDRESS
     bus: Optional[SMBus] = SMBus(I2C_CHANNEL)
 
-    i2c: I2C = I2C(board.SCL, board.SDA)
+    # i2c: I2C = I2C(board.SCL, board.SDA)
     bme680: Any
 
     camera: Any

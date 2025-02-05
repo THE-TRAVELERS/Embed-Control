@@ -3,4 +3,3 @@ gpiozero==2.0.1
 opencv-python==4.11.0.86 
 smbus2==0.4.3
 psutil==6.1.1 
-board==1.0
