@@ -6,14 +6,11 @@
   Ce programme contrôle un microcontrôleur ESP32 qui interfère avec deux ESCs 
   (Electronic Speed Controllers) et des moteurs via la communication I2C.
 */
-#include <Arduino.h>
-#include <Wire.h>
-#include <ESP32Servo.h>
+#include <Navigation.h>
+#include <main.h>
 
 // I2C address of the esp
-#define I2C_DEV_ADDR 0x52
-int relaisRight =1;
-int relaisLeft=2;
+
 
 // Servo object to control the ESC
 Servo esc;
@@ -48,19 +45,17 @@ void onReceive(int len){
 void setup(){
     Wire.onReceive(onReceive);
     Wire.begin((uint8_t)I2C_DEV_ADDR);
-    Serial.begin(9600);
+    Serial.begin(Baud_rate);
 
 
   	// setup the servo pinmode
-
-  
   	// setup the relais pins mode
-  	pinMode(relaisRight,OUTPUT);
-  	pinMode(relaisLeft,OUTPUT);
+  	pinMode(Rightrelay,OUTPUT);
+  	pinMode(Leftrelay,OUTPUT);
   
   	// write to go in front 
-  	digitalWrite(relaisRight,LOW);
-  	digitalWrite(relaisLeft,LOW);
+  	digitalWrite(Rightrelay,LOW);
+  	digitalWrite(Leftrelay,LOW);
     //TODO : write the correct pin for the ESC + setup I2C connection 
 
     //TODO : write the correct pin for the ESC + setup I2C connection 
