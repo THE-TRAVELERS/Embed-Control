@@ -35,14 +35,30 @@ void Navigation::Joystick_unsign(float x, float y){
 
 void Navigation::Compute_Speed(){
     // TODO : make math to have the rigth speed for each motor
-    int a = 4;
+    // Calculate the speed for each motor based on x and y coordinates
+    float leftSpeed = yJoystick - xJoystick;
+    float rightSpeed = yJoystick + xJoystick;
+
+    // Normalize the speeds to be within the range of -255 to 255
+    leftSpeed = constrain(leftSpeed, -255, 255);
+    rightSpeed = constrain(rightSpeed, -255, 255);
+
+    // Set the speeds to the motors
+    Left_Motor->setSpeed(leftSpeed*0.8);
+    Right_Motor->setSpeed(rightSpeed*0.8);
+
+    Serial.print("Left Speed: ");
+    Serial.println(leftSpeed);
+    Serial.print("Right Speed: ");
+    Serial.println(rightSpeed);
 }
 
 
 void Navigation::Joystick_command_direction(){
     // we ensure the rigth direction of the motors
     Left_Motor->updateDirection(yJoystick);
-    Right_Motor->updateDirection(yJoystick);
+    Right_Motor->updateDirection(yJoystick); 
+
     //now we send the unsign value to control the speed;
 }
 
