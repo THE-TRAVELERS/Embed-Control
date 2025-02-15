@@ -3,7 +3,6 @@ from typing import Callable, Coroutine
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from functools import wraps
 
-
 from app.i2c import I2CUtils
 from app.routers.services import WebSocketsServices
 from app.routers.status import services_status
@@ -15,12 +14,13 @@ enabled_services = {
     "humidity": False,
     "temperature": False,
     "pressure": False,
-    "CPU_temperature": True,
-    "CPU_usage": True,
-    "RAM_usage": True,
+    "cpu_temperature": True,
+    "cpu_usage": True,
+    "ram_usage": True,
 }
 
 router: APIRouter = APIRouter()
+
 
 class WebSocketManager:
     @classmethod
@@ -115,7 +115,8 @@ class WebSocketManager:
                         WebSocketsServices.ws_camera,
                     )
                     logging.debug("[WEBSOCKETS] Initialized.")
-                logging.error("[WEBSOCKETS] Initialization failed.")
+                else:
+                    logging.error("[WEBSOCKETS] Initialization failed.")
         else:
             logging.warning("[WEBSOCKETS] Skipping initialization of general services.")
 
@@ -169,31 +170,31 @@ class WebSocketManager:
         Initializes all internal sensor WebSocket services.
         """
         if (
-            enabled_services["CPU_temperature"]
-            or enabled_services["CPU_usage"]
-            or enabled_services["RAM_usage"]
+            enabled_services["cpu_temperature"]
+            or enabled_services["cpu_usage"]
+            or enabled_services["ram_usage"]
         ):
-            if enabled_services["CPU_temperature"]:
+            if enabled_services["cpu_temperature"]:
                 logging.debug("[WEBSOCKETS] Initializing CPU temperature service.")
                 cls.setup_websocket_service(
                     "internal_sensor",
-                    "CPU_temperature",
+                    "cpu_temperature",
                     WebSocketsServices.ws_internal_cpu_temperature,
                 )
                 logging.debug("[WEBSOCKETS] Initialized.")
-            if enabled_services["CPU_usage"]:
+            if enabled_services["cpu_usage"]:
                 logging.debug("[WEBSOCKETS] Initializing CPU usage service.")
                 cls.setup_websocket_service(
                     "internal_sensor",
-                    "CPU_usage",
+                    "cpu_usage",
                     WebSocketsServices.ws_internal_cpu_usage,
                 )
                 logging.debug("[WEBSOCKETS] Initialized.")
-            if enabled_services["RAM_usage"]:
+            if enabled_services["ram_usage"]:
                 logging.debug("[WEBSOCKETS] Initializing RAM usage service.")
                 cls.setup_websocket_service(
                     "internal_sensor",
-                    "RAM_usage",
+                    "ram_usage",
                     WebSocketsServices.ws_internal_ram_usage,
                 )
                 logging.debug("[WEBSOCKETS] Initialized.")

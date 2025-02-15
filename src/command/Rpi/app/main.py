@@ -1,3 +1,4 @@
+import logging
 from app.utils import Utils
 from app.logs import Logs
 from fastapi import FastAPI
@@ -13,3 +14,6 @@ WebSocketManager.init_services()
 app.include_router(ws_router)
 app.include_router(status_router)
 
+logging.debug("Registered routes:")
+for route in app.routes:
+    logging.debug(f" + {route.name}: {route.path}")

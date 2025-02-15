@@ -18,9 +18,9 @@ services_status: Dict[str, Dict[str, bool]] = {
         "pressure": False,
     },
     "internal_sensor": {
-        "CPU_temperature": False,
-        "CPU_usage": False,
-        "RAM_usage": False,
+        "cpu_temperature": False,
+        "cpu_usage": False,
+        "ram_usage": False,
     },
 }
 
