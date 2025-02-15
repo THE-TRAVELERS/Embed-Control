@@ -19,7 +19,7 @@ class I2CUtils:
     """
 
     slave_address: int = I2C_SLAVE_ADDRESS
-    bus: Optional[SMBus] = SMBus(I2C_CHANNEL)
+    bus: Optional[SMBus] # = SMBus(I2C_CHANNEL)
 
     # i2c: I2C = I2C(board.SCL, board.SDA)
     bme680: Any

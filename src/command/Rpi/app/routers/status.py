@@ -65,8 +65,9 @@ async def get_service_status(service_name: str) -> Dict[str, Any]:
     """
     global services_status
     with lock:
-        if service_name in services_status:
-            return {"service": service_name, "status": services_status[service_name]}
+        for category, services in services_status.items():
+            if service_name in services:
+                return {"service": service_name, "status": services[service_name]}
         raise HTTPException(
             status_code=404,
             detail=f"Service '{service_name}' not found.",

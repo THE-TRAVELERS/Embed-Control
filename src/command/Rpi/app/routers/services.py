@@ -3,7 +3,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 import asyncio
 import psutil
 
-import cv2
+# import cv2
 import base64
 
 from app.i2c import I2CUtils
@@ -63,10 +63,10 @@ class WebSocketsServices:
             I2CUtils.camera.start()
             while True:
                 frame = I2CUtils.camera.capture_array()
-                _, encoded = cv2.imencode(".jpg", frame)
-                data = str(base64.b64encode(encoded))
-                data = data[2 : len(data) - 1]  # remove the quotes from the encoding
-                await websocket.send_text(data)
+                # _, encoded = cv2.imencode(".jpg", frame)
+                # data = str(base64.b64encode(encoded))
+                # data = data[2 : len(data) - 1]  # remove the quotes from the encoding
+                # await websocket.send_text(data)
         except WebSocketDisconnect:
             I2CUtils.camera.stop()
             logging.info("[WEBSOCKETS] Video stream stopped.")

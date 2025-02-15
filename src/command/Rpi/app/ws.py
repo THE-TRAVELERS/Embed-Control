@@ -1,9 +1,8 @@
 import logging
 from typing import Callable, Coroutine
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from functools import wraps
 
-from app import main
 
 from app.i2c import I2CUtils
 from app.routers.services import WebSocketsServices
@@ -12,7 +11,7 @@ from app.routers.status import services_status
 enabled_services = {
     "debug": True,
     "controller": True,
-    "camera": False,
+    "camera": True,
     "humidity": False,
     "temperature": False,
     "pressure": False,
@@ -21,133 +20,9 @@ enabled_services = {
     "RAM_usage": True,
 }
 
+router: APIRouter = APIRouter()
 
 class WebSocketManager:
-    @classmethod
-    def init_services(cls) -> None:
-        """
-        Initializes all WebSocket services.
-        """
-        cls.init_ws_general()
-        cls.init_ws_external_sensor()
-        cls.init_ws_internal_sensor()
-
-    @classmethod
-    def init_ws_general(cls) -> None:
-        """
-        Initializes all general WebSocket services.
-        """
-        if (
-            enabled_services["debug"]
-            or enabled_services["controller"]
-            or enabled_services["camera"]
-        ):
-            logging.debug("[WEBSOCKETS] Initializing general services.")
-            if enabled_services["debug"]:
-                logging.debug("[WEBSOCKETS] Initializing debug service.")
-                cls.setup_websocket_service(
-                    "general",
-                    "debug",
-                    WebSocketsServices.ws_debug,
-                )
-            if enabled_services["controller"]:
-                logging.debug("[WEBSOCKETS] Initializing controller service.")
-                cls.setup_websocket_service(
-                    "general",
-                    "controller",
-                    WebSocketsServices.ws_controller,
-                )
-            if enabled_services["camera"]:
-                logging.debug("[WEBSOCKETS] Initializing camera service.")
-                if I2CUtils.init_camera():
-                    cls.setup_websocket_service(
-                        "general",
-                        "camera",
-                        WebSocketsServices.ws_camera,
-                    )
-        else:
-            logging.warning(
-                "[WEBSOCKETS] No general services enabled. Skipping initialization."
-            )
-
-    @classmethod
-    def init_ws_external_sensor(cls) -> None:
-        """
-        Initializes all external sensor WebSocket services.
-        """
-        if (
-            enabled_services["humidity"]
-            or enabled_services["temperature"]
-            or enabled_services["pressure"]
-        ):
-            logging.debug("[WEBSOCKETS] Initializing external sensor services.")
-            if I2CUtils.init_bme680():
-                if enabled_services["humidity"]:
-                    logging.debug("[WEBSOCKETS] Initializing humidity service.")
-                    cls.setup_websocket_service(
-                        "external_sensor",
-                        "humidity",
-                        WebSocketsServices.ws_external_humidity,
-                    )
-                if enabled_services["temperature"]:
-                    logging.debug("[WEBSOCKETS] Initializing temperature service.")
-                    cls.setup_websocket_service(
-                        "external_sensor",
-                        "temperature",
-                        WebSocketsServices.ws_external_temperature,
-                    )
-                if enabled_services["pressure"]:
-                    logging.debug("[WEBSOCKETS] Initializing pressure service.")
-                    cls.setup_websocket_service(
-                        "external_sensor",
-                        "pressure",
-                        WebSocketsServices.ws_external_pressure,
-                    )
-        else:
-            logging.warning(
-                "[WEBSOCKETS] No external sensor services enabled. Skipping initialization."
-            )
-
-    @classmethod
-    def init_ws_internal_sensor(cls) -> None:
-        """
-        Initializes all internal sensor WebSocket services.
-        """
-        if (
-            enabled_services["CPU_temperature"]
-            or enabled_services["CPU_usage"]
-            or enabled_services["RAM_usage"]
-        ):
-            logging.debug("[WEBSOCKETS] Initializing internal sensor services.")
-            if enabled_services["CPU_temperature"]:
-                logging.debug("[WEBSOCKETS] Initializing CPU temperature service.")
-                cls.setup_websocket_service(
-                    "internal_sensor",
-                    "CPU_temperature",
-                    WebSocketsServices.ws_internal_cpu_temperature,
-                )
-
-            if enabled_services["CPU_usage"]:
-                logging.debug("[WEBSOCKETS] Initializing CPU usage service.")
-                cls.setup_websocket_service(
-                    "internal_sensor",
-                    "CPU_usage",
-                    WebSocketsServices.ws_internal_cpu_usage,
-                )
-            if enabled_services["RAM_usage"]:
-                logging.debug("[WEBSOCKETS] Initializing RAM usage service.")
-                cls.setup_websocket_service(
-                    "internal_sensor",
-                    "RAM_usage",
-                    WebSocketsServices.ws_internal_ram_usage,
-                )
-            logging.info("[WEBSOCKETS] All enabled WebSocket services initialized.")
-
-        else:
-            logging.warning(
-                "[WEBSOCKETS] No internal sensor services enabled. Skipping initialization."
-            )
-
     @classmethod
     def setup_websocket_service(
         cls,
@@ -164,7 +39,7 @@ class WebSocketManager:
             func (Callable[[WebSocket], Coroutine[None, None, None]]): The async function to be called when the WebSocket is accessed.
         """
 
-        @main.app.websocket(f"/{ws_category}/{ws_name}")
+        @router.websocket(f"/{ws_category}/{ws_name}")
         @wraps(func)
         async def wrapper(websocket: WebSocket):
             await websocket.accept()
@@ -194,3 +69,135 @@ class WebSocketManager:
                 )
 
         return wrapper
+
+    @classmethod
+    def init_services(cls) -> None:
+        """
+        Initializes all WebSocket services.
+        """
+        cls.init_ws_general()
+        cls.init_ws_external_sensor()
+        cls.init_ws_internal_sensor()
+        logging.info("[WEBSOCKETS] Initialization complete.")
+
+    @classmethod
+    def init_ws_general(cls) -> None:
+        """
+        Initializes all general WebSocket services.
+        """
+        if (
+            enabled_services["debug"]
+            or enabled_services["controller"]
+            or enabled_services["camera"]
+        ):
+            if enabled_services["debug"]:
+                logging.debug("[WEBSOCKETS] Initializing debug service.")
+                cls.setup_websocket_service(
+                    "general",
+                    "debug",
+                    WebSocketsServices.ws_debug,
+                )
+                logging.debug("[WEBSOCKETS] Initialized.")
+            if enabled_services["controller"]:
+                logging.debug("[WEBSOCKETS] Initializing controller service.")
+                cls.setup_websocket_service(
+                    "general",
+                    "controller",
+                    WebSocketsServices.ws_controller,
+                )
+                logging.debug("[WEBSOCKETS] Initialized.")
+            if enabled_services["camera"]:
+                logging.debug("[WEBSOCKETS] Initializing camera service.")
+                if I2CUtils.init_camera():
+                    cls.setup_websocket_service(
+                        "general",
+                        "camera",
+                        WebSocketsServices.ws_camera,
+                    )
+                    logging.debug("[WEBSOCKETS] Initialized.")
+                logging.error("[WEBSOCKETS] Initialization failed.")
+        else:
+            logging.warning("[WEBSOCKETS] Skipping initialization of general services.")
+
+    @classmethod
+    def init_ws_external_sensor(cls) -> None:
+        """
+        Initializes all external sensor WebSocket services.
+        """
+        if (
+            enabled_services["humidity"]
+            or enabled_services["temperature"]
+            or enabled_services["pressure"]
+        ):
+            if I2CUtils.init_bme680():
+                if enabled_services["humidity"]:
+                    logging.debug("[WEBSOCKETS] Initializing humidity service.")
+                    cls.setup_websocket_service(
+                        "external_sensor",
+                        "humidity",
+                        WebSocketsServices.ws_external_humidity,
+                    )
+                    logging.debug("[WEBSOCKETS] Initialized.")
+                if enabled_services["temperature"]:
+                    logging.debug("[WEBSOCKETS] Initializing temperature service.")
+                    cls.setup_websocket_service(
+                        "external_sensor",
+                        "temperature",
+                        WebSocketsServices.ws_external_temperature,
+                    )
+                    logging.debug("[WEBSOCKETS] Initialized.")
+                if enabled_services["pressure"]:
+                    logging.debug("[WEBSOCKETS] Initializing pressure service.")
+                    cls.setup_websocket_service(
+                        "external_sensor",
+                        "pressure",
+                        WebSocketsServices.ws_external_pressure,
+                    )
+                    logging.debug("[WEBSOCKETS] Initialized.")
+            else:
+                logging.error(
+                    "[WEBSOCKETS] Failed to initialize external sensor services."
+                )
+        else:
+            logging.warning(
+                "[WEBSOCKETS] Skipping initialization of external sensor services."
+            )
+
+    @classmethod
+    def init_ws_internal_sensor(cls) -> None:
+        """
+        Initializes all internal sensor WebSocket services.
+        """
+        if (
+            enabled_services["CPU_temperature"]
+            or enabled_services["CPU_usage"]
+            or enabled_services["RAM_usage"]
+        ):
+            if enabled_services["CPU_temperature"]:
+                logging.debug("[WEBSOCKETS] Initializing CPU temperature service.")
+                cls.setup_websocket_service(
+                    "internal_sensor",
+                    "CPU_temperature",
+                    WebSocketsServices.ws_internal_cpu_temperature,
+                )
+                logging.debug("[WEBSOCKETS] Initialized.")
+            if enabled_services["CPU_usage"]:
+                logging.debug("[WEBSOCKETS] Initializing CPU usage service.")
+                cls.setup_websocket_service(
+                    "internal_sensor",
+                    "CPU_usage",
+                    WebSocketsServices.ws_internal_cpu_usage,
+                )
+                logging.debug("[WEBSOCKETS] Initialized.")
+            if enabled_services["RAM_usage"]:
+                logging.debug("[WEBSOCKETS] Initializing RAM usage service.")
+                cls.setup_websocket_service(
+                    "internal_sensor",
+                    "RAM_usage",
+                    WebSocketsServices.ws_internal_ram_usage,
+                )
+                logging.debug("[WEBSOCKETS] Initialized.")
+        else:
+            logging.warning(
+                "[WEBSOCKETS] Skipping initialization of internal sensor services."
+            )
