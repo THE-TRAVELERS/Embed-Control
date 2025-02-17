@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    container_name: travelers_client
+    restart: unless-stopped
+    command: ['python', 'app']
+    ports:
+      # Websocket port
+      - '8765:8765'
+    volumes:
+      - ./app:/app
