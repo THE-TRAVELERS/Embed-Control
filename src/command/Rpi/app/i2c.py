@@ -77,7 +77,8 @@ class I2CUtils:
             logging.error(f"[SENSORS] Error initializing Picamera: {e}")
             return False
 
-    def convert_string_to_bytes(self, val: str) -> list[int]:
+    @classmethod
+    def convert_string_to_bytes(cls, val: str) -> list[int]:
         """Converts a string to a list of bytes.
 
         Args:
@@ -88,7 +89,8 @@ class I2CUtils:
         """
         return [ord(c) for c in val]
 
-    def write_data(self, value: str):
+    @classmethod
+    def write_data(cls, value: str):
         """Writes a string to the I2C bus as a block of data.
 
         Args:
@@ -97,9 +99,11 @@ class I2CUtils:
         Raises:
             Exception: Propagates any exceptions raised by write_i2c_block_data.
         """
-        byte_value: list[int] = self.convert_string_to_bytes(value)
-
+        logging.debug(f"[I2C] Writing data: {value}")
+        byte_value: list[int] = cls.convert_string_to_bytes(value)
+        logging.debug(f"[I2C] Writing data: {byte_value}")
         try:
-            self.bus.write_i2c_block_data(self.slave_address, 0x00, byte_value)
+            cls.bus.write_i2c_block_data(cls.slave_address, 0x00, byte_value)
         except Exception as e:
+            logging.error(f"[I2C] Error writing data: {e}")
             raise e

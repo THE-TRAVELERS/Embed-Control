@@ -3,15 +3,6 @@ import threading
 import time
 from pyPS4Controller.controller import Controller
 
-######################################
-# Feature for pc_main.py
-#
-# def check_wifi():
-#     if Utils.get_wifi_info() != 0:
-#         exit(1)
-######################################
-
-
 # UDP variables
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 UDP_IP = "10.3.141.1"  # "127.0.0.1" = loopback (send to yourself)
@@ -23,7 +14,7 @@ valL, valR = 0, 0
 oldL, oldR = 0, 0
 MAX = 32767
 DEAD = 4000
-DELAY = 30 * (10) ** (-6)
+DELAY = 0.00003
 
 # Direction of rotation variables
 FORWARD_L = True
@@ -95,10 +86,10 @@ class MyController(Controller):
         valR = 0
 
     def on_L2_press(self, value):
-        print("on_L2_press: {}".format(value))
+        pass
 
     def on_R2_press(self, value):
-        print("on_R2_press: {}".format(value))
+        pass
 
     # A lot of functions are declared to overwrite them
     # (We could modify the library to prevent this action)
@@ -127,39 +118,34 @@ class MyController(Controller):
         pass
 
     def on_L3_press(self):
-        """L3 joystick is clicked. This event is only detected when connecting without ds4drv"""
-        print("on_L3_press")
+        pass
 
     def on_up_arrow_press(self):
-        print("on_up_arrow_press")
+        pass
 
     def on_down_arrow_press(self):
-        print("on_down_arrow_press")
+        pass
 
     def on_left_arrow_press(self):
-        print("on_left_arrow_press")
+        pass
 
     def on_right_arrow_press(self):
-        print("on_right_arrow_press")
+        pass
 
     def on_R3_press(self):
-        """R3 joystick is clicked. This event is only detected when connecting without ds4drv"""
-        print("on_R3_press")
+        pass
 
     def on_options_press(self):
-        print("on_options_press")
+        pass
 
     def on_share_press(self):
-        """this event is only detected when connecting without ds4drv"""
-        print("on_share_press")
+        pass
 
     def on_playstation_button_press(self):
-        """this event is only detected when connecting without ds4drv"""
-        print("on_playstation_button_press")
+        pass
 
     def on_playstation_button_release(self):
-        """this event is only detected when connecting without ds4drv"""
-        print("on_playstation_button_release")
+        pass
 
     def on_x_release(self):
         pass
@@ -194,10 +180,10 @@ class MyController(Controller):
     def on_L3_release(self):
         pass
 
-    def on_R3_left(self, value):
+    def on_R3_left(self):
         pass
 
-    def on_R3_right(self, value):
+    def on_R3_right(self):
         pass
 
     def on_R3_x_at_rest(self):

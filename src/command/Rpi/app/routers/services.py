@@ -44,7 +44,7 @@ class WebSocketsServices:
             logging.info("[WEBSOCKETS] Controller stopped.")
             raise WebSocketDisconnect
         except Exception as e:
-            logging.error("[WEBSOCKETS] An error occured in the controller websocket.")
+            logging.error(f"[WEBSOCKETS] Error in controller: {e}")
             raise e
 
     async def ws_camera(websocket: WebSocket):
