@@ -6,8 +6,14 @@ from keyboard_input_handler import KeyboardInputHandler
 from controller_input_handler import ControllerInputHandler
 import threading
 
-SERVER_HTTP_ADDRESS = "http://localhost:8765/"
-SERVER_WS_ADDRESS = "ws://localhost:8765/"
+# Server address:
+# For development
+# SERVER = "localhost"
+# For production
+SERVER = "travelers5.local"
+
+SERVER_HTTP_ADDRESS = f"http://{SERVER}:8765/"
+SERVER_WS_ADDRESS = f"ws://{SERVER}:8765/"
 CONTROLLER_URL = SERVER_WS_ADDRESS + "general/controller"
 LINUX_CONTROLLER_INTERFACE = "/dev/input/js0"
 
